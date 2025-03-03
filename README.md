@@ -104,7 +104,7 @@ Once the binary is installed, you can modify your `~/.config/hypr/hyprland.conf`
       focused window
     - `--filter-current-monitor / -m` Only switch between windows that are on the same monitor as the currently focused
       window
-    - `--sort-recent` Sort windows by most recently focused
+    - `--sort-recent` Sort windows by most recently focused (only works with `--switch-type client`)
     - `--switch-type` Switches to next / previous workspace / client / monitor
         - `client` [default] Switch to next / previous client
         - `workspace` Switch to next / previous workspace

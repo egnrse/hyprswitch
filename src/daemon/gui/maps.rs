@@ -86,7 +86,7 @@ pub fn reload_desktop_maps() {
 
 fn find_application_dirs() -> Vec<PathBuf> {
     let mut dirs = env::var_os("XDG_DATA_DIRS")
-        .map(|val| env::split_paths(&val).map(PathBuf::from).collect())
+        .map(|val| env::split_paths(&val).collect())
         .unwrap_or_else(|| {
             vec![
                 PathBuf::from("/usr/local/share"),
@@ -180,7 +180,7 @@ fn fill_desktop_file_map(
                         }
                     })
                     .and_then(|l| l.split(' ').next())
-                    .and_then(|l| l.split('/').last())
+                    .and_then(|l| l.split('/').next_back())
                     .map(|n| n.replace('"', ""));
                 let startup_wm_class = lines
                     .iter()
@@ -240,7 +240,7 @@ fn fill_desktop_file_map(
                         .map(|l| l.trim_start_matches("Terminal="))
                         .map(|l| l == "true")
                         .unwrap_or(false);
-                    if ttype == Some("Application") && no_display.map_or(true, |n| !n) {
+                    if ttype == Some("Application") && no_display.is_none_or(|n| !n) {
                         if let (Some(name), Some(exec)) = (name, exec) {
                             let mut exec = String::from(exec);
                             for repl in &["%f", "%F", "%u", "%U"] {

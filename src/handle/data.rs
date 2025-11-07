@@ -177,15 +177,15 @@ pub fn collect_data(config: SimpleConfig) -> anyhow::Result<(HyprlandData, Optio
         client.enabled = (!config.filter_same_class
             || active
                 .as_ref()
-                .map_or(true, |active| client.class == *active.0))
+                .is_none_or(|active| client.class == *active.0))
             && (!config.filter_current_workspace
                 || active
                     .as_ref()
-                    .map_or(true, |active| client.workspace == active.1))
+                    .is_none_or(|active| client.workspace == active.1))
             && (!config.filter_current_monitor
                 || active
                     .as_ref()
-                    .map_or(true, |active| client.monitor == active.2));
+                    .is_none_or(|active| client.monitor == active.2));
     }
 
     // iterate over all workspaces and set active to false if no client is on the workspace is active

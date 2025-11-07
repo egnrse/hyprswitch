@@ -45,7 +45,7 @@ pub fn set_icon(class: &str, pid: i32, image: &Image) {
             .next()
             .unwrap_or_default()
             .split('/')
-            .last()
+            .next_back()
             .unwrap_or_default();
         if cmd.is_empty() {
             warn!("Failed to read cmdline for PID {}", pid);

@@ -18,10 +18,12 @@ fn main() -> anyhow::Result<()> {
     let cli = cli::App::try_parse()
         .unwrap_or_else(|e| {
             if !cli::check_invalid_inputs(&e) {
-                toast("Unable to parse CLI Arguments (visit https://github.com/H3rmt/hyprswitch/blob/main/README.md to see all CLI Args)");
+                toast("Unable to parse CLI Arguments (visit https://github.com/egnrse/hyprswitch/blob/main/README.md to see all CLI Args)");
+				eprintln!("{}", e);
+				exit(1);
             }
             eprintln!("{}", e);
-            exit(1);
+            exit(0);
         });
 
     let filter = EnvFilter::from_default_env().add_directive(
@@ -120,7 +122,7 @@ fn main() -> anyhow::Result<()> {
             reverse_key,
         } => {
             if !client::daemon_running() {
-                toast("Daemon not running (add ``exec-once = hyprswitch init &`` to your Hyprland config or run ``hyprswitch init &`` it in a terminal)\nvisit https://github.com/H3rmt/hyprswitch/wiki/Examples to see Example configs");
+                toast("Daemon not running (add ``exec-once = hyprswitch init &`` to your Hyprland config or run ``hyprswitch init &`` it in a terminal)\nvisit https://github.com/egnrse/hyprswitch/wiki/Examples to see Example configs");
                 return Err(anyhow::anyhow!("Daemon not running"));
             }
             // client::send_version_check_command()

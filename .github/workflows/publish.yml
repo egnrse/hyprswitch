@@ -1,9 +1,9 @@
 name: Publish
 
-on:
-  push:
-    tags:
-      - v*
+#on:
+#  push:
+#    tags:
+#      - v*
 
 env:
   CARGO_TERM_COLOR: always

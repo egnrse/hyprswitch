@@ -5,9 +5,9 @@ version = "3.3.2"
 edition = "2021"
 license = "MIT"
 readme = "README.md"
-authors = ["h3rmt"]
+authors = ["h3rmt", "egnrse"]
 documentation = "https://docs.rs/crate/hyprswitch"
-repository = "https://github.com/h3rmt/hyprswitch/"
+repository = "https://github.com/egnrse/hyprswitch/"
 keywords = ["hyprland"]
 categories = ["command-line-utilities"]
 

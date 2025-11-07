@@ -105,14 +105,10 @@ pub enum Command {
     },
 }
 
-/// only show error if not caused by --help ort -V (every start of every help text needs to be added...)
+/// only show error if not caused by --help or --version
 pub fn check_invalid_inputs(e: &clap::Error) -> bool {
-    e.to_string()
-        .starts_with("A CLI/GUI that allows switching between windows in Hyprland")
-        || e.to_string().starts_with("Initialize and start the Daemon")
-        || e.to_string()
-            .starts_with("Switch without using the GUI / Daemon (switches directly)")
-        || e.to_string().starts_with(
-            "Debug command to debug finding icons for the GUI, doesn't interact with the Daemon",
-        )
+	matches!(e.kind(), 
+        clap::error::ErrorKind::DisplayHelp |
+        clap::error::ErrorKind::DisplayVersion
+    )
 }

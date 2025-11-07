@@ -19,9 +19,11 @@ fn main() -> anyhow::Result<()> {
         .unwrap_or_else(|e| {
             if !cli::check_invalid_inputs(&e) {
                 toast("Unable to parse CLI Arguments (visit https://github.com/egnrse/hyprswitch/blob/main/README.md to see all CLI Args)");
+				eprintln!("{}", e);
+				exit(1);
             }
             eprintln!("{}", e);
-            exit(1);
+            exit(0);
         });
 
     let filter = EnvFilter::from_default_env().add_directive(

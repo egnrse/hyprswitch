@@ -16,7 +16,7 @@ pub use debug::DebugCommand;
     author,
     version,
     about,
-    long_about = "A CLI/GUI that allows switching between windows in Hyprland\nvisit https://github.com/H3rmt/hyprswitch/wiki/Examples to see Example configs"
+    long_about = "A CLI/GUI that allows switching between windows in Hyprland\nvisit https://github.com/egnrse/hyprswitch/wiki/Examples to see Example configs"
 )]
 pub struct App {
     #[clap(flatten)]

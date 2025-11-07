@@ -210,5 +210,5 @@ const VERSION_OUT_OF_SYNC: &str = r"
 This is most likely caused by updating hyprswitch and not restarting the hyprswitch daemon.
 You must manually start the new version (run `pkill hyprswitch && hyprswitch init &` in a terminal)
 
-(visit https://github.com/H3rmt/hyprswitch/releases to see latest release and new features)
+(visit https://github.com/egnrse/hyprswitch/releases to see latest release and new features)
 ";

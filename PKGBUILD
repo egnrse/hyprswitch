@@ -15,7 +15,7 @@ license=("MIT")
 makedepends=('cargo')
 depends=('hyprland' 'gtk4-layer-shell' 'gtk4')
 source=("$pkgname-$pkgver.tar.gz::https://github.com/egnrse/hyprswitch/archive/refs/tags/v${pkgver}.tar.gz")
-sha256sums=('4007e7dbc8d47b1a2a0afd17ceb0323ea1ae63d07cf0f9e85d6e4c99bc052e10')
+sha256sums=('2133feabc060b2e58608927ac8126b98bedbb311f764444e6a336582d0a90aa0')
 
 prepare() {
     export RUSTUP_TOOLCHAIN=stable

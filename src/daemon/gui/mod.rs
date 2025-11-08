@@ -184,6 +184,21 @@ async fn handle_update(
         }
         Ok((GUISend::Hide, ref update_cause)) => {
             let _span = span!(Level::TRACE, "hide", cause = update_cause.to_string()).entered();
+            let _windows = {
+                let data = shared_data.lock().expect("Failed to lock, shared_data");
+                let monitor_data = monitor_data.lock().expect("Failed to lock, monitor_data");
+
+                let mut windows = 0;
+                for window in (*monitor_data).keys() {
+                    trace!("Hiding window {:?}", window);
+                    windows += 1;
+                    window.set_visible(false);
+                }
+
+                drop(data);
+                drop(monitor_data);
+                windows // use scope to drop locks and prevent hold MutexGuard across await
+            };
         }
         Ok((GUISend::Exit, ref update_cause)) => {
             let _span = span!(Level::TRACE, "exit", cause = update_cause.to_string()).entered();

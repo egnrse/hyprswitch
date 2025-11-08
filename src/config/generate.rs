@@ -105,7 +105,6 @@ fn generate_press(
     let mut params = Vec::<String>::new();
     params.push(format!("--submap={}", submap_name));
     params.push(format!("--reverse-key={}", press.navigate.reverse));
-    params.push(format!("--show-launcher={}", press.show_launcher));
     generate_other(&mut params, &press.other);
     generate_common_gui(&mut params, &press.other);
 
@@ -340,20 +339,6 @@ fn generate_daemon_start(
     envs.push(format!("DISABLE_TOASTS={}", general.disable_toast));
 
     params.push(format!("--size_factor={}", general.size_factor));
-
-    envs.push(format!("SHOW_LAUNCHER={}", general.launcher.enable));
-    envs.push(format!("LAUNCHER_MAX_ITEMS={}", general.launcher.items));
-    envs.push(format!(
-        "SHOW_LAUNCHER_EXECS={}",
-        general.launcher.show_execs
-    ));
-    envs.push(format!(
-        "LAUNCHER_ANIMATE_LAUNCH_TIME={}",
-        general.launcher.animate_launch_time_ms
-    ));
-    if let Some(default_terminal) = general.launcher.default_terminal {
-        envs.push(format!("DEFAULT_TERMINAL={}", default_terminal));
-    }
 
     params.push(format!("--show-title={}", general.gui.show_title));
     params.push(format!(

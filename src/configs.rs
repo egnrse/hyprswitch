@@ -52,14 +52,6 @@ pub struct GuiConfig {
     pub hide_active_window_border: bool,
     pub monitors: Option<Vec<String>>,
     pub show_workspaces_on_all_monitors: bool,
-    pub show_launcher: bool,
-}
-
-#[derive(Debug, Default)]
-pub struct LauncherConfig {
-    pub execs: Vec<Exec>,
-    pub selected: Option<usize>,
-    pub launch_state: LaunchState,
 }
 
 #[derive(Debug, Default, Clone, Copy)]

@@ -97,7 +97,6 @@ pub struct SharedData {
     pub gui_config: GuiConfig,
     pub active: Option<Active>,
     pub hypr_data: HyprlandData,
-    pub launcher_config: LauncherConfig,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -139,7 +138,6 @@ pub enum GUISend {
 #[derive(Debug, Clone)]
 pub enum UpdateCause {
     Client(u8),
-    LauncherUpdate,
     GuiClick,
     BackgroundThread(Option<u8>),
 }
@@ -148,7 +146,6 @@ impl Display for UpdateCause {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             UpdateCause::Client(id) => write!(f, "id:{}", id),
-            UpdateCause::LauncherUpdate => write!(f, "lu"),
             UpdateCause::GuiClick => write!(f, "gc"),
             UpdateCause::BackgroundThread(op) => match op {
                 Some(id) => write!(f, "bt:{}", id),

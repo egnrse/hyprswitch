@@ -296,10 +296,6 @@ Here some examples of the order in which windows will appear in the hyprswitch G
 These variables are subject to change and might be removed in the future (activate debug mode with -v and look for `ENV dump:` in the logs to see the current values or inside the [envs.rs](./src/envs.rs) file)
 
 - `REMOVE_HTML_FROM_WORKSPACE_NAME` bool [default: true]: Remove HTML tag (currently only `<span>{}</span>`) from workspace name
-- `SHOW_LAUNCHER` bool [default: true]: Show a Launcher Icon in the GUI when using default `--close` mode
-- `LAUNCHER_MAX_ITEMS` i32 [default: 5]: Maximum number of items in the Launcher
-- `DEFAULT_TERMINAL` string [default: ""]: Terminal to use for launching terminal applications, eg. `alacritty`. (If
-  empty, a list if known terminals is used)
 - `DISABLE_TOASTS` bool [default: false]: Disable toasts when errors in the daemon or keybinds are detected
 
 ### Migration to 3.0.0

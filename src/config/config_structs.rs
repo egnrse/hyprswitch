@@ -17,23 +17,7 @@ pub struct General {
     pub size_factor: f64,
     #[default(None)]
     pub custom_css_path: Option<String>,
-    pub launcher: Launcher,
     pub gui: Gui,
-}
-
-#[derive(SmartDefault, Debug, Deserialize, Serialize)]
-#[serde(default)]
-pub struct Launcher {
-    #[default = false]
-    pub enable: bool,
-    #[default = 6]
-    pub items: u8,
-    #[default(None)]
-    pub default_terminal: Option<String>,
-    #[default = true]
-    pub show_execs: bool,
-    #[default = 300]
-    pub animate_launch_time_ms: u64,
 }
 
 #[derive(SmartDefault, Debug, Deserialize, Serialize)]
@@ -82,8 +66,6 @@ pub struct CloseHold {
 #[derive(SmartDefault, Debug, Deserialize, Serialize)]
 #[serde(default)]
 pub struct PressBindConfig {
-    #[default = true]
-    pub show_launcher: bool,
     pub open: OpenPress,
     pub navigate: Navigate,
     pub close: ClosePress,

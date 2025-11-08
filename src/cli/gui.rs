@@ -52,11 +52,6 @@ pub struct GuiConf {
     #[arg(long, default_value = "false", action = clap::ArgAction::Set, default_missing_value = "true", num_args=0..=1
     )]
     pub show_workspaces_on_all_monitors: bool,
-
-    /// Show the application launcher in the GUI
-    #[arg(long, default_value = "false", action = clap::ArgAction::Set, default_missing_value = "true", num_args=0..=1
-    )]
-    pub show_launcher: bool,
 }
 
 impl From<GuiConf> for GuiConfig {
@@ -66,7 +61,6 @@ impl From<GuiConf> for GuiConfig {
             hide_active_window_border: opts.hide_active_window_border,
             monitors: opts.monitors.map(|m| m.0),
             show_workspaces_on_all_monitors: opts.show_workspaces_on_all_monitors,
-            show_launcher: opts.show_launcher,
         }
     }
 }

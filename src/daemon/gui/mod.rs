@@ -1,4 +1,3 @@
-use crate::envs::SHOW_LAUNCHER;
 use crate::{GUISend, InitConfig, Payload, Share, SubmapConfig, UpdateCause, Warn};
 use anyhow::Context;
 use async_channel::{Receiver, RecvError, Sender};
@@ -28,11 +27,9 @@ pub use maps::reload_desktop_maps;
 mod debug;
 mod gui_handle;
 mod icon;
-mod launcher;
 mod maps;
 mod windows;
 
-pub use launcher::show_launch_spawn;
 use crate::daemon::gui::maps::init_icon_map;
 
 pub(super) fn start_gui_blocking(
@@ -77,12 +74,6 @@ pub(super) fn start_gui_blocking(
             drop(monitor_data_list);
         }
 
-        let launcher_refs: LauncherRefs = Rc::new(Mutex::new(None));
-        if *SHOW_LAUNCHER {
-            launcher::create_launcher(app, &share, launcher_refs.clone(), visibility_sender)
-                .warn("Failed to create launcher");
-        }
-
         glib::spawn_future_local(clone!(
             #[strong]
             share,
@@ -94,8 +85,6 @@ pub(super) fn start_gui_blocking(
             receiver,
             #[strong]
             return_sender,
-            #[strong]
-            launcher_refs,
             async move {
                 loop {
                     trace!("Waiting for GUI update");
@@ -105,7 +94,6 @@ pub(super) fn start_gui_blocking(
                         &init_config,
                         &mess,
                         monitor_data_list.clone(),
-                        launcher_refs.clone(),
                         visibility_receiver.clone(),
                     )
                     .await;
@@ -129,7 +117,6 @@ async fn handle_update(
     init_config: &InitConfig,
     mess: &Result<Payload, RecvError>,
     monitor_data: Rc<Mutex<HashMap<ApplicationWindow, (MonitorData, Monitor)>>>,
-    launcher: Rc<Mutex<Option<(ApplicationWindow, Entry, ListBox)>>>,
     visibility_receiver: Receiver<bool>,
 ) {
     let (shared_data, _, _) = share.deref();
@@ -141,7 +128,6 @@ async fn handle_update(
             let windows = {
                 let data = shared_data.lock().expect("Failed to lock, shared_data");
                 let mut monitor_data = monitor_data.lock().expect("Failed to lock, monitor_data");
-                let launcher = launcher.lock().expect("Failed to lock, launcher");
 
                 let mut windows = 0;
                 for (window, (monitor_data, monitor)) in monitor_data.iter_mut() {
@@ -151,29 +137,8 @@ async fn handle_update(
                         }
                     }
 
-                    // TODO only open when using --close = default
-                    if data.gui_config.show_launcher {
-                        let workspaces = data
-                            .hypr_data
-                            .workspaces
-                            .iter()
-                            .filter(|(_, w)| {
-                                data.gui_config.show_workspaces_on_all_monitors
-                                    || w.monitor == monitor_data.id
-                            })
-                            .collect::<Vec<_>>()
-                            .len() as i32;
-                        let rows = (workspaces as f32 / init_config.workspaces_per_row as f32)
-                            .ceil() as i32;
-                        let height = monitor.geometry().height();
-                        window.set_margin(
-                            Edge::Bottom,
-                            max(30, (height / 2) - ((height / 5) * rows)),
-                        );
-                        window.set_anchor(Edge::Bottom, true);
-                    } else {
-                        window.set_anchor(Edge::Bottom, false);
-                    }
+					window.set_anchor(Edge::Bottom, false);
+                    
 
                     trace!("Showing window {:?}", window);
                     windows += 1;
@@ -192,21 +157,9 @@ async fn handle_update(
                     trace!("Refresh window {:?}", window);
                     windows::update_windows(monitor_data, &data).warn("Failed to update windows");
                 }
-                // only open launcher when opening with default close mode
-                if data.gui_config.show_launcher {
-                    launcher.as_ref().inspect(|(window, entry, _)| {
-                        trace!("Showing launcher {:?}", window);
-                        windows += 1;
-                        window.set_visible(true);
-                        window.focus();
-                        entry.set_text("");
-                        entry.grab_focus();
-                    });
-                }
 
                 drop(data);
                 drop(monitor_data);
-                drop(launcher);
                 windows // use scope to drop locks and prevent hold MutexGuard across await
             };
             // waits until all windows are visible
@@ -220,32 +173,7 @@ async fn handle_update(
             let _span = span!(Level::TRACE, "refresh", cause = update_cause.to_string()).entered();
             let mut data = shared_data.lock().expect("Failed to lock, shared_data");
             let mut monitor_data = monitor_data.lock().expect("Failed to lock, monitor_data");
-            let launcher = launcher.lock().expect("Failed to lock, launcher");
 
-            // only update launcher wen using default close mode
-            if data.gui_config.show_launcher {
-                launcher.as_ref().inspect(|(_, e, l)| {
-                    if data.launcher_config.selected.is_none() && !e.text().is_empty() {
-                        data.launcher_config.selected = Some(0);
-                    }
-                    if data.launcher_config.selected.is_some() && e.text().is_empty() {
-                        data.launcher_config.selected = None;
-                    }
-                    let reverse_key = match &data.submap_config {
-                        SubmapConfig::Name { reverse_key, .. } => reverse_key,
-                        SubmapConfig::Config { reverse_key, .. } => reverse_key,
-                    };
-                    let execs = launcher::update_launcher(
-                        share.clone(),
-                        &e.text(),
-                        l,
-                        data.launcher_config.selected,
-                        data.launcher_config.launch_state,
-                        reverse_key,
-                    );
-                    data.launcher_config.execs = execs;
-                });
-            }
             for (window, (monitor_data, _)) in &mut monitor_data.iter_mut() {
                 if let Some(monitors) = &data.gui_config.monitors {
                     if !monitors.iter().any(|m| *m == monitor_data.connector) {
@@ -261,16 +189,8 @@ async fn handle_update(
             let windows = {
                 let data = shared_data.lock().expect("Failed to lock, shared_data");
                 let monitor_data = monitor_data.lock().expect("Failed to lock, monitor_data");
-                let launcher = launcher.lock().expect("Failed to lock, launcher");
 
                 let mut windows = 0;
-                if data.gui_config.show_launcher {
-                    launcher.as_ref().inspect(|(window, _, _)| {
-                        trace!("Hiding launcher {:?}", window);
-                        windows += 1;
-                        window.set_visible(false);
-                    });
-                }
                 for window in (*monitor_data).keys() {
                     trace!("Hiding window {:?}", window);
                     windows += 1;
@@ -279,29 +199,17 @@ async fn handle_update(
 
                 drop(data);
                 drop(monitor_data);
-                drop(launcher);
                 windows // use scope to drop locks and prevent hold MutexGuard across await
             };
-            // waits until all windows are hidden (needed for launcher with keyboard mode exclusive [commit:b34b5eb8157292e19156ca0650a10f1cb0307d8d])
-            trace!("Waiting for {windows} windows to hide");
-            for _ in 0..windows {
-                // receive async not to block gtk event loop
-                visibility_receiver.recv().await.expect("Failed to receive");
-            }
         }
         Ok((GUISend::Exit, ref update_cause)) => {
             let _span = span!(Level::TRACE, "exit", cause = update_cause.to_string()).entered();
             let monitor_data = monitor_data.lock().expect("Failed to lock, monitor_data");
-            let launcher = launcher.lock().expect("Failed to lock, launcher");
 
             for window in (*monitor_data).keys() {
                 trace!("Closing window {:?}", window);
                 window.close();
             }
-            launcher.as_ref().inspect(|(window, _, _)| {
-                trace!("Closing window {:?}", window);
-                window.close();
-            });
         }
         Err(e) => {
             warn!("Receiver closed: {e}");
@@ -312,10 +220,9 @@ async fn handle_update(
 fn apply_css(custom_css: Option<&PathBuf>) {
     let provider_app = CssProvider::new();
     provider_app.load_from_data(&format!(
-        "{}\n{}\n{}",
+        "{}\n{}",
         include_str!("defaults.css"),
         include_str!("windows/windows.css"),
-        include_str!("launcher/launcher.css")
     ));
     style_context_add_provider_for_display(
         &Display::default()
@@ -342,7 +249,6 @@ fn apply_css(custom_css: Option<&PathBuf>) {
     }
 }
 
-type LauncherRefs = Rc<Mutex<Option<(ApplicationWindow, Entry, ListBox)>>>;
 
 pub struct MonitorData {
     id: MonitorId,

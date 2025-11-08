@@ -1,6 +1,6 @@
 use crate::configs::DispatchConfig;
 use crate::daemon::cache::cache_run;
-use crate::daemon::gui::{reload_desktop_maps, show_launch_spawn};
+use crate::daemon::gui::reload_desktop_maps;
 use crate::daemon::submap::{activate_submap, deactivate_submap, generate_submap};
 use crate::handle::{clear_recent_clients, collect_data, find_next, run_program, switch_to_active};
 use crate::{global, GUISend, GuiConfig, Share, SimpleConfig, SubmapConfig, UpdateCause, Warn};
@@ -15,27 +15,15 @@ pub(crate) fn switch(
 ) -> anyhow::Result<()> {
     let (latest, send, receive) = share.deref();
     {
-        let mut lock = latest.lock().expect("Failed to lock");
-        let exec_len = lock.launcher_config.execs.len();
-        if let Some(ref mut selected) = lock.launcher_config.selected {
-            if exec_len == 0 {
-                return Ok(());
-            }
-            *selected = if dispatch_config.reverse {
-                selected.saturating_sub(dispatch_config.offset as usize)
-            } else {
-                (*selected + dispatch_config.offset as usize).min(exec_len - 1)
-            };
-        } else {
-            let active = find_next(
-                &lock.simple_config.switch_type,
-                dispatch_config,
-                &lock.hypr_data,
-                lock.active.as_ref(),
-            )?;
-            lock.active = Some(active);
-        }
-        drop(lock);
+		let mut lock = latest.lock().expect("Failed to lock");
+		let active = find_next(
+			&lock.simple_config.switch_type,
+			dispatch_config,
+			&lock.hypr_data,
+			lock.active.as_ref(),
+		)?;
+		lock.active = Some(active);
+		drop(lock);
     }
 
     trace!("Sending refresh to GUI");
@@ -114,34 +102,23 @@ pub(crate) fn close(share: &Share, kill: bool, client_id: u8) -> anyhow::Result<
         .expect("Failed to lock")) = false;
 
     if !kill {
-        let lock = latest.lock().expect("Failed to lock");
-        if let Some(selected) = lock.launcher_config.selected {
-            if let Some(exec) = lock.launcher_config.execs.get(selected) {
-                show_launch_spawn(share.clone(), Some(client_id));
-                run_program(&exec.exec, &exec.path, exec.terminal);
-                cache_run(&exec.exec).warn("Failed to cache run");
-            } else {
-                warn!("Selected program (nr. {}) not found, killing", selected);
-            }
-            drop(lock); // drop lock after both ifs
-        } else {
-            drop(lock); // drop lock before sending hide
+		let lock = latest.lock().expect("Failed to lock");
+		drop(lock); // drop lock before sending hide
 
-            trace!("Sending hide to GUI");
-            send.send_blocking((GUISend::Hide, UpdateCause::Client(client_id)))
-                .context("Unable to hide the GUI")?;
-            let rec = receive
-                .recv_blocking()
-                .context("Unable to receive GUI update")?;
-            trace!("Received hide finish from GUI: {rec:?}");
+		trace!("Sending hide to GUI");
+		send.send_blocking((GUISend::Hide, UpdateCause::Client(client_id)))
+			.context("Unable to hide the GUI")?;
+		let rec = receive
+			.recv_blocking()
+			.context("Unable to receive GUI update")?;
+		trace!("Received hide finish from GUI: {rec:?}");
 
-            // switch after closing gui
-            // (KeyboardMode::Exclusive on launcher doesn't allow switching windows if it is still active)
-            let lock = latest.lock().expect("Failed to lock");
-            switch_to_active(lock.active.as_ref(), &lock.hypr_data)?;
-            drop(lock);
-        }
-    } else {
+		// switch after closing gui
+		// (KeyboardMode::Exclusive on launcher doesn't allow switching windows if it is still active)
+		let lock = latest.lock().expect("Failed to lock");
+		switch_to_active(lock.active.as_ref(), &lock.hypr_data)?;
+		drop(lock);
+	} else {
         info!("Not executing switch on close, killing");
 
         trace!("Sending hide to GUI");

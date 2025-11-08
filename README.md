@@ -19,7 +19,6 @@ A rust CLI/GUI to switch between windows in [Hyprland](https://github.com/hyprwm
 
 ### Experimental Features
 
-- launch applications from the GUI <!-- update -->
 - support for plugging in new monitors while running [only when run as systemd service]
 - automatically restart when version changes [only when run as systemd service]
 - create all binds and configs from a single config file
@@ -243,7 +242,7 @@ You can find more examples in the [Wiki](https://github.com/egnrse/hyprswitch/wi
 }
 ```
 
-See [Wiki](https://github.com/egnrse/hyprswitch/wiki/CSS) for more info or look at [default.css](src/daemon/gui/defaults.css), [windows.css](src/daemon/gui/windows/windows.css) and [launcher.css](src/daemon/gui/launcher/launcher.css) for the default CSS styles.
+See [Wiki](https://github.com/egnrse/hyprswitch/wiki/CSS) for more info or look at [default.css](src/daemon/gui/defaults.css), [windows.css](src/daemon/gui/windows/windows.css) for the default CSS styles.
 
 ## Other
 

@@ -58,7 +58,7 @@ pub enum ReverseKey {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum TransferType {
-    // switch to next/prev workspace/monitor/client or next selection in launcher
+    // switch to next/prev workspace/monitor/client
     Dispatch(DispatchConfig),
     // init with config, gui_config and submap
     Init(SimpleConfig, GuiConfig, SubmapConfig),

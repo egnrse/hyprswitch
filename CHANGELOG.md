@@ -1,5 +1,24 @@
 # Changelog
 
+## [4.0.0](https://github.com/egnrse/hyprswitch/compare/v3.3.2...v4.0.0) (2025-11-08)
+
+
+### ⚠ BREAKING CHANGES
+
+* remove app launcher
+
+### Features
+
+* change Maintainer, update README ([9c50fd1](https://github.com/egnrse/hyprswitch/commit/9c50fd1418e6ca7e468c302abbef877cce9e7751))
+* remove app launcher ([9fe23e6](https://github.com/egnrse/hyprswitch/commit/9fe23e6120920f5d8f752f51abc99811784d6f43))
+
+
+### Bug Fixes
+
+* **cli:** fix --version/ ([d67d22f](https://github.com/egnrse/hyprswitch/commit/d67d22fb89e24072f365570d4dd0d83a6ab1dfe1))
+* **cli:** fix --version/--help ([f72409c](https://github.com/egnrse/hyprswitch/commit/f72409ce6ede634fc829a07a74865340fe68086b))
+* make clippy happy ([a77e270](https://github.com/egnrse/hyprswitch/commit/a77e2703410b569373435da03a82bc370420b3f7))
+
 ## [3.3.2](https://github.com/H3rmt/hyprswitch/compare/v3.3.1...v3.3.2) (2025-02-06)
 
 

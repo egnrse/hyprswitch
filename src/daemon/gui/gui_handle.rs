@@ -1,14 +1,12 @@
-use crate::daemon::cache::cache_run;
 use crate::daemon::deactivate_submap;
 use crate::daemon::gui::reload_desktop_maps;
-use crate::handle::{clear_recent_clients, run_program, switch_to_active};
+use crate::handle::{clear_recent_clients, switch_to_active};
 use crate::{global, Active, GUISend, Share, UpdateCause, Warn};
-use anyhow::Context;
 use gtk4::glib::clone;
 use hyprland::shared::{Address, MonitorId, WorkspaceId};
 use std::ops::Deref;
 use std::thread;
-use tracing::{trace, warn};
+use tracing::trace;
 
 pub(crate) fn gui_set_client(share: &Share, address: Address) {
     let (latest, _, _) = share.deref();

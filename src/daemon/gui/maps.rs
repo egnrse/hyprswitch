@@ -2,7 +2,7 @@ use crate::Warn;
 use gtk4::IconTheme;
 use std::collections::{BTreeSet, HashMap};
 use std::path::Path;
-use std::sync::{Mutex, MutexGuard};
+use std::sync::Mutex;
 use std::time::Instant;
 use std::{env, fs::DirEntry, path::PathBuf, sync::OnceLock};
 use tracing::{debug, span, trace, warn, Level};
@@ -66,13 +66,6 @@ pub fn add_path_for_icon(class: &str, name: &str, source: Source) {
         (Box::from(class.to_ascii_lowercase()), source),
         (Box::from(name), Box::from(Path::new(""))),
     );
-}
-
-pub fn get_all_desktop_files<'a>() -> MutexGuard<'a, DesktopFileMap> {
-    let map = get_desktop_file_map()
-        .lock()
-        .expect("Failed to lock desktop file map");
-    map
 }
 
 pub fn reload_desktop_maps() {

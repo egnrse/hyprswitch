@@ -4,7 +4,6 @@ use crate::{InitConfig, Payload, Share, SharedData};
 use gtk4::glib::clone;
 use tracing::{debug, span, Level};
 
-mod cache;
 pub mod gui;
 mod handle_client;
 mod handle_fns;

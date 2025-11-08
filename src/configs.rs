@@ -1,4 +1,4 @@
-use crate::{CloseType, Exec, ModKey, ReverseKey, SwitchType};
+use crate::{CloseType, ModKey, ReverseKey, SwitchType};
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
 use std::path::PathBuf;

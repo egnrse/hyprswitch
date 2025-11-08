@@ -1,19 +1,17 @@
-use crate::{GUISend, InitConfig, Payload, Share, SubmapConfig, UpdateCause, Warn};
+use crate::{GUISend, InitConfig, Payload, Share, UpdateCause, Warn};
 use anyhow::Context;
 use async_channel::{Receiver, RecvError, Sender};
 use gtk4::gdk::{Display, Monitor};
 use gtk4::glib::{clone, GString};
 use gtk4::prelude::{
-    ApplicationExt, ApplicationExtManual, EditableExt, GtkWindowExt, MonitorExt, WidgetExt,
+    ApplicationExt, ApplicationExtManual, GtkWindowExt, WidgetExt,
 };
 use gtk4::{
-    glib, style_context_add_provider_for_display, Application, ApplicationWindow, CssProvider,
-    Entry, FlowBox, Label, ListBox, Overlay, STYLE_PROVIDER_PRIORITY_APPLICATION,
+    glib, style_context_add_provider_for_display, Application, ApplicationWindow, CssProvider, FlowBox, Label, Overlay, STYLE_PROVIDER_PRIORITY_APPLICATION,
     STYLE_PROVIDER_PRIORITY_USER,
 };
 use gtk4_layer_shell::{Edge, LayerShell};
 use hyprland::shared::{Address, MonitorId, WorkspaceId};
-use std::cmp::max;
 use std::collections::HashMap;
 use std::ops::Deref;
 use std::path::PathBuf;
@@ -130,7 +128,7 @@ async fn handle_update(
                 let mut monitor_data = monitor_data.lock().expect("Failed to lock, monitor_data");
 
                 let mut windows = 0;
-                for (window, (monitor_data, monitor)) in monitor_data.iter_mut() {
+                for (window, (monitor_data, _)) in monitor_data.iter_mut() {
                     if let Some(monitors) = &data.gui_config.monitors {
                         if !monitors.iter().any(|m| *m == monitor_data.connector) {
                             continue;
@@ -171,7 +169,7 @@ async fn handle_update(
         }
         Ok((GUISend::Refresh, ref update_cause)) => {
             let _span = span!(Level::TRACE, "refresh", cause = update_cause.to_string()).entered();
-            let mut data = shared_data.lock().expect("Failed to lock, shared_data");
+            let data = shared_data.lock().expect("Failed to lock, shared_data");
             let mut monitor_data = monitor_data.lock().expect("Failed to lock, monitor_data");
 
             for (window, (monitor_data, _)) in &mut monitor_data.iter_mut() {
@@ -186,21 +184,6 @@ async fn handle_update(
         }
         Ok((GUISend::Hide, ref update_cause)) => {
             let _span = span!(Level::TRACE, "hide", cause = update_cause.to_string()).entered();
-            let windows = {
-                let data = shared_data.lock().expect("Failed to lock, shared_data");
-                let monitor_data = monitor_data.lock().expect("Failed to lock, monitor_data");
-
-                let mut windows = 0;
-                for window in (*monitor_data).keys() {
-                    trace!("Hiding window {:?}", window);
-                    windows += 1;
-                    window.set_visible(false);
-                }
-
-                drop(data);
-                drop(monitor_data);
-                windows // use scope to drop locks and prevent hold MutexGuard across await
-            };
         }
         Ok((GUISend::Exit, ref update_cause)) => {
             let _span = span!(Level::TRACE, "exit", cause = update_cause.to_string()).entered();

@@ -1,12 +1,11 @@
 use crate::configs::DispatchConfig;
-use crate::daemon::cache::cache_run;
 use crate::daemon::gui::reload_desktop_maps;
 use crate::daemon::submap::{activate_submap, deactivate_submap, generate_submap};
-use crate::handle::{clear_recent_clients, collect_data, find_next, run_program, switch_to_active};
-use crate::{global, GUISend, GuiConfig, Share, SimpleConfig, SubmapConfig, UpdateCause, Warn};
+use crate::handle::{clear_recent_clients, collect_data, find_next, switch_to_active};
+use crate::{global, GUISend, GuiConfig, Share, SimpleConfig, SubmapConfig, UpdateCause};
 use anyhow::Context;
 use std::ops::Deref;
-use tracing::{info, trace, warn};
+use tracing::{info, trace};
 
 pub(crate) fn switch(
     share: &Share,

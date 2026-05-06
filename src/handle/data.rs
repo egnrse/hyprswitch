@@ -27,7 +27,7 @@ pub fn collect_data(config: SimpleConfig) -> anyhow::Result<(HyprlandData, Optio
             .filter(|w| config.include_special_workspaces || !w.id < 0)
             .collect::<Vec<_>>();
 
-        workspaces.sort_by(|a, b| a.id.cmp(&b.id));
+        workspaces.sort_by_key(|a| a.id);
         workspaces
     };
 
@@ -155,8 +155,8 @@ pub fn collect_data(config: SimpleConfig) -> anyhow::Result<(HyprlandData, Optio
         client_data = update_clients(client_data, None, Some(&monitor_data));
     }
 
-    workspace_data.sort_by(|a, b| a.0.cmp(&b.0));
-    monitor_data.sort_by(|a, b| a.0.cmp(&b.0));
+    workspace_data.sort_by_key(|a| a.0);
+    monitor_data.sort_by_key(|a| a.0);
 
     let active = Client::get_active()?;
     let active: Option<(String, WorkspaceId, MonitorId, Address)> = active.as_ref().map_or_else(

@@ -29,7 +29,7 @@ pub fn init_windows(
             .iter()
             .filter(|(_, v)| show_workspaces_on_all_monitors || v.monitor == monitor_data.id)
             .collect::<Vec<_>>();
-        workspaces.sort_by(|(a, _), (b, _)| a.cmp(b));
+        workspaces.sort_by_key(|(a, _)| *a);
         workspaces
     };
 
@@ -126,7 +126,8 @@ pub fn init_windows(
                     let image = Image::builder()
                         .css_classes(vec!["client-image"])
                         .pixel_size(
-                            (scale(client.height, size_factor).clamp(50, 200) as f64 / 1.5) as i32 - 20,
+                            (scale(client.height, size_factor).clamp(50, 200) as f64 / 1.5) as i32
+                                - 20,
                         )
                         .build();
                     if !client.enabled {

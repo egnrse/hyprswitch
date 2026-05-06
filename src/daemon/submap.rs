@@ -1,20 +1,28 @@
 use std::env;
+use std::process::Command;
 
 use anyhow::Context;
-use hyprland::dispatch::{Dispatch, DispatchType};
-use hyprland::keyword::Keyword;
 use tracing::{debug, span, trace, Level};
 
 use crate::{CloseType, ModKey, ReverseKey, Warn};
 
 pub(super) fn activate_submap(submap_name: &str) -> anyhow::Result<()> {
 	let _span = span!(Level::TRACE, "submap").entered();
-	Dispatch::call(DispatchType::Custom("submap", submap_name)).warn("unable to activate submap");
+	let script = format!("hl.dispatch(hl.dsp.submap('{}'))", submap_name);
+	Command::new("hyprctl")
+		.args(["eval", &script])
+		.output()
+		.context("failed to execute hyprctl eval")?
+		.status
+		.success()
+		.then_some(())
+		.context("hyprctl eval failed")
+		.warn("unable to activate submap");
 	debug!("Activated submap: {}", submap_name);
 	Ok(())
 }
 
-fn generate_submap_name(_keyword_list: &[(&str, String)]) -> String {
+fn generate_submap_name() -> String {
 	format!("hyprswitch-{}", rand::random::<u16>())
 }
 
@@ -25,7 +33,7 @@ pub(super) fn generate_submap(
 	close: CloseType,
 ) -> anyhow::Result<()> {
 	let _span = span!(Level::TRACE, "submap").entered();
-	let mut keyword_list = Vec::<(&str, String)>::new();
+	let mut lua_binds = Vec::<String>::new();
 	(|| -> anyhow::Result<()> {
 		let current_exe = env::current_exe()?;
 		let current_exe = current_exe
@@ -35,113 +43,134 @@ pub(super) fn generate_submap(
 		let main_mod = get_mod_from_mod_key(mod_key.clone());
 		trace!("current_exe: {}", current_exe);
 
+		// Helper closure to format bind easily to lua
+		let mut bind = |mods: &str, k: &str, cmd: &str, rt: bool| {
+			let opts = if rt {
+				", { release = true, transparent = true }"
+			} else {
+				""
+			};
+			let keys = if mods.is_empty() {
+				k.to_string()
+			} else {
+				format!("{} + {}", mods, k)
+			};
+			lua_binds.push(format!(
+				"hl.bind('{}', hl.dsp.exec_cmd('{}'){})",
+				keys, cmd, opts
+			));
+		};
+
 		// always bind escape to kill
-		keyword_list.push((
-			"bind",
-			format!(" ,escape , exec, {} close --kill", current_exe),
-		));
-		keyword_list.push((
-			"bind",
-			format!("{} ,escape , exec, {} close --kill", main_mod, current_exe),
-		));
+		bind(
+			"",
+			"escape",
+			&format!("{} close --kill", current_exe),
+			false,
+		);
+		bind(
+			main_mod,
+			"escape",
+			&format!("{} close --kill", current_exe),
+			false,
+		);
 
 		// repeatable presses
 		match close {
 			CloseType::ModKeyRelease => {
 				// allow repeatable presses to switch to next
-				keyword_list.push((
-					"bind",
-					format!("{}, {}, exec, {} dispatch", main_mod, key, current_exe),
-				));
+				bind(main_mod, &key, &format!("{} dispatch", current_exe), false);
 				match reverse_key.clone() {
 					ReverseKey::Mod(modkey) => {
-						keyword_list.push((
-							"bind",
-							format!(
-								"{} {}, {}, exec, {} dispatch -r",
-								main_mod, modkey, key, current_exe
-							),
-						));
+						bind(
+							&format!("{} {}", main_mod, modkey),
+							&key,
+							&format!("{} dispatch -r", current_exe),
+							false,
+						);
 					}
-					ReverseKey::Key(key) => {
-						keyword_list.push((
-							"bind",
-							format!("{}, {}, exec, {} dispatch -r", main_mod, key, current_exe),
-						));
+					ReverseKey::Key(rkey) => {
+						bind(
+							main_mod,
+							&rkey,
+							&format!("{} dispatch -r", current_exe),
+							false,
+						);
 					}
 				};
 			}
 			CloseType::Default => {
-				keyword_list.push((
-					"bind",
-					format!("{}, {}, exec, {} close --kill", main_mod, key, current_exe),
-				));
+				bind(
+					main_mod,
+					&key,
+					&format!("{} close --kill", current_exe),
+					false,
+				);
 			}
 		};
 
 		// close on release of the mod key
 		match close {
 			CloseType::ModKeyRelease => {
-				keyword_list.push((
-					"bindrt",
-					format!("{}, {}, exec, {} close", main_mod, mod_key, current_exe),
-				));
+				bind(
+					main_mod,
+					&mod_key.to_string(),
+					&format!("{} close", current_exe),
+					true,
+				);
 				if let ReverseKey::Mod(modkey) = reverse_key.clone() {
-					keyword_list.push((
-						"bindrt",
-						format!(
-							"{} {}, {}, exec, {} close",
-							main_mod, modkey, mod_key, current_exe
-						),
-					));
+					bind(
+						&format!("{} {}", main_mod, modkey),
+						&mod_key.to_string(),
+						&format!("{} close", current_exe),
+						true,
+					);
 				};
 			}
 			CloseType::Default => {
 				// bind return to close
-				keyword_list.push(("bind", format!(" ,return , exec, {} close", current_exe)));
+				bind("", "return", &format!("{} close", current_exe), false);
 			}
 		};
 
 		// jump to index
 		match close {
 			CloseType::ModKeyRelease => {
-				// main_mod needed as it is still pressed
 				for i in 1..=9 {
-					keyword_list.push((
-						"bind",
-						format!(
-							"{} ,{}, exec, {} dispatch -o={}",
-							main_mod, i, current_exe, i
-						),
-					));
+					bind(
+						main_mod,
+						&i.to_string(),
+						&format!("{} dispatch -o={}", current_exe, i),
+						false,
+					);
 					if let ReverseKey::Mod(modkey) = reverse_key.clone() {
-						keyword_list.push((
-							"bind",
-							format!(
-								"{} {},{}, exec, {} dispatch -o={} -r",
-								main_mod, modkey, i, current_exe, i
-							),
-						));
+						bind(
+							&format!("{} {}", main_mod, modkey),
+							&i.to_string(),
+							&format!("{} dispatch -o={} -r", current_exe, i),
+							false,
+						);
 					};
 				}
 			}
 			CloseType::Default => {
 				for i in 1..=9 {
-					keyword_list.push((
-						"bind",
-						format!(
-							",{}, exec, {} dispatch -o={} && {} close",
-							i, current_exe, i, current_exe
-						),
-					));
+					bind(
+						"",
+						&i.to_string(),
+						&format!("{} dispatch -o={} && {} close", current_exe, i, current_exe),
+						false,
+					);
 					if let ReverseKey::Mod(modkey) = reverse_key.clone() {
-						keyword_list.push((
-							"bind",
-							format!(
-								"{},{}, exec, {} dispatch -o={} -r && {} close",
-								modkey, i, current_exe, i, current_exe
+						bind(
+							&modkey.to_string(),
+							&i.to_string(),
+							&format!(
+								"{} dispatch -o={} -r && {} close",
+								current_exe, i, current_exe
 							),
-						));
+							false,
+						);
 					};
 				}
 			}
@@ -150,46 +179,67 @@ pub(super) fn generate_submap(
 		// use arrow keys to navigate
 		match close {
 			CloseType::Default => {
-				keyword_list.push(("bind", format!(",right, exec, {} dispatch", current_exe)));
-				keyword_list.push(("bind", format!(",left, exec, {} dispatch -r", current_exe)));
+				bind("", "right", &format!("{} dispatch", current_exe), false);
+				bind("", "left", &format!("{} dispatch -r", current_exe), false);
 			}
 			CloseType::ModKeyRelease => {
-				keyword_list.push((
-					"bind",
-					format!("{},right, exec, {} dispatch", main_mod, current_exe),
-				));
-				keyword_list.push((
-					"bind",
-					format!("{},left, exec, {} dispatch -r", main_mod, current_exe),
-				));
+				bind(
+					main_mod,
+					"right",
+					&format!("{} dispatch", current_exe),
+					false,
+				);
+				bind(
+					main_mod,
+					"left",
+					&format!("{} dispatch -r", current_exe),
+					false,
+				);
 			}
 		}
 
-		// bind = alt, o, exec, kill $(pidof hyprswitch)
 		#[cfg(debug_assertions)]
-		keyword_list.push((
-			"bind",
-			"alt, o, exec, kill $(pidof hyprswitch) && hyprctl dispatch submap reset".to_string(),
-		));
+		bind(
+			"alt",
+			"o",
+			"kill $(pidof hyprswitch) && hyprctl dispatch submap reset",
+			false,
+		);
 
-		keyword_list.push(("submap", "reset".to_string()));
+		let name = generate_submap_name();
 
-		let name = generate_submap_name(&keyword_list);
-		Keyword::set("submap", name.clone())?;
+		lua_binds.push("hl.bind('escape', hl.dsp.submap('reset'))".to_string());
 
-		trace!("keyword_list: ");
-		for (key, value) in keyword_list {
-			trace!("{} = {}", key, value);
-			Keyword::set(key, value)?;
-		}
-		trace!("keyword_list end");
+		// Construct the full define_submap lua code
+		let lua_script = format!(
+			"hl.define_submap('{}', function()\n    {}\nend)",
+			name,
+			lua_binds.join("\n    ")
+		);
 
-		Dispatch::call(DispatchType::Custom("submap", &name))?;
+		trace!("lua_script: \n{}", lua_script);
+
+		Command::new("hyprctl")
+			.args(["eval", &lua_script])
+			.output()
+			.context("failed to execute hyprctl eval")?
+			.status
+			.success()
+			.then_some(())
+			.context("hyprctl eval failed")
+			.warn("unable to generate submap");
+
+		// activate the submap
+		let script = format!("hl.dispatch(hl.dsp.submap('{}'))", name);
+		Command::new("hyprctl").args(["eval", &script]).output()?;
+
 		Ok(())
 	})()
 	.inspect_err(|_| {
 		// reset submap if failed
-		Dispatch::call(DispatchType::Custom("submap", "reset")).warn("unable to generate submap");
+		let _ = Command::new("hyprctl")
+			.args(["eval", "hl.dispatch(hl.dsp.submap('reset'))"])
+			.output();
 	})?;
 
 	Ok(())
@@ -197,7 +247,13 @@ pub(super) fn generate_submap(
 
 pub fn deactivate_submap() {
 	let _span = span!(Level::TRACE, "submap").entered();
-	Dispatch::call(DispatchType::Custom("submap", "reset")).warn("unable to deactivate submap");
+	Command::new("hyprctl")
+		.args(["eval", "hl.dispatch(hl.dsp.submap('reset'))"])
+		.output()
+		.map(|out| out.status.success().then_some(()))
+		.unwrap_or(None)
+		.context("hyprctl eval failed")
+		.warn("unable to deactivate submap");
 	debug!("Deactivated submap");
 }
 

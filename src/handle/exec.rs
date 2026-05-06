@@ -1,8 +1,5 @@
 use anyhow::Context;
 use hyprland::data::{Workspace, WorkspaceBasic};
-use hyprland::dispatch::{
-	Dispatch, DispatchType, MonitorIdentifier, WindowIdentifier, WorkspaceIdentifierWithSpecial,
-};
 use hyprland::prelude::HyprDataActive;
 use hyprland::shared::{Address, MonitorId, WorkspaceId};
 use tracing::{debug, span, warn, Level};
@@ -74,9 +71,12 @@ fn switch_monitor(monitor_id: &MonitorId, dry_run: bool) -> anyhow::Result<()> {
 		}
 	} else {
 		debug!("[EXEC] switch to monitor {monitor_id}");
-		Dispatch::call(DispatchType::FocusMonitor(MonitorIdentifier::Id(
-			*monitor_id,
-		)))?;
+		std::process::Command::new("hyprctl")
+			.args([
+				"eval",
+				&format!("hl.dispatch(hl.dsp.focus({{ monitor = {} }}))", monitor_id),
+			])
+			.output()?;
 	}
 	Ok(())
 }
@@ -117,10 +117,18 @@ fn switch_client(address: &Address, dry_run: bool) -> anyhow::Result<()> {
 		}
 	} else {
 		debug!("[EXEC] switch to next_client: {}", address);
-		Dispatch::call(DispatchType::FocusWindow(WindowIdentifier::Address(
-			address.clone(),
-		)))?;
-		Dispatch::call(DispatchType::BringActiveToTop)?;
+		std::process::Command::new("hyprctl")
+			.args([
+				"eval",
+				&format!(
+					"hl.dispatch(hl.dsp.focus({{ window = 'address:{}' }}))",
+					address
+				),
+			])
+			.output()?;
+		std::process::Command::new("hyprctl")
+			.args(["eval", "hl.dispatch(hl.dsp.window.bring_to_top())"])
+			.output()?;
 	}
 
 	Ok(())
@@ -134,9 +142,15 @@ fn switch_normal_workspace(workspace_id: WorkspaceId, dry_run: bool) -> anyhow::
 		}
 	} else {
 		debug!("[EXEC] switch to workspace {workspace_id}");
-		Dispatch::call(DispatchType::Workspace(WorkspaceIdentifierWithSpecial::Id(
-			workspace_id,
-		)))?;
+		std::process::Command::new("hyprctl")
+			.args([
+				"eval",
+				&format!(
+					"hl.dispatch(hl.dsp.focus({{ workspace = '{}' }}))",
+					workspace_id
+				),
+			])
+			.output()?;
 	}
 	Ok(())
 }
@@ -154,7 +168,12 @@ fn toggle_special_workspace(workspace_name: &str, dry_run: bool) -> anyhow::Resu
 		}
 	} else {
 		debug!("[EXEC] toggle workspace {name}");
-		Dispatch::call(DispatchType::ToggleSpecialWorkspace(Some(name)))?;
+		std::process::Command::new("hyprctl")
+			.args([
+				"eval",
+				&format!("hl.dispatch(hl.dsp.workspace.toggle_special('{}'))", name),
+			])
+			.output()?;
 	}
 	Ok(())
 }

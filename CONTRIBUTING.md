@@ -4,7 +4,7 @@ Some notes for myself and contributors.
 ## Testing
 ```sh
 cargo build --all-targets --all-features
-cargo test --all-features
+cargo test --all-features -- --include-ignored
 cargo clippy --all-targets --all-features
 
 # try stuff
@@ -25,6 +25,7 @@ src/          source tree
 config/       example/default config
 imgs/         visuals for docs and README
 systemd/      experimental systemd support
+tests/        some tests
 test-svgs/    svg outputs for test
 .idea/        my notes and ideas
 ```

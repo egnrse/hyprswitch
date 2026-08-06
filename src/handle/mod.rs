@@ -95,7 +95,7 @@ pub fn get_active_monitor() -> Option<String> {
             Monitors::get().map(|monitors| {
                 monitors
                     .iter()
-                    .find(|m| m.id == c.monitor)
+                    .find(|m| Some(m.id) == c.monitor)
                     .map(|mm| mm.name.clone())
             })
         })

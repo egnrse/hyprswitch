@@ -2,7 +2,7 @@ use crate::config::config_structs::{
     Bind, Config, FilterBy, General, HoldBindConfig, Other, PressBindConfig, Reverse,
     SimpleBindConfig, ToKey,
 };
-use rand::Rng;
+use rand::RngExt;
 use std::env;
 use std::path::PathBuf;
 use tracing::trace;

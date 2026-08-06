@@ -60,7 +60,7 @@ pub fn collect_data(config: SimpleConfig) -> anyhow::Result<(HyprlandData, Optio
             let mut x_offset: i32 = 0;
             workspaces
                 .iter()
-                .filter(|ws| ws.monitor_id == *monitor_id)
+                .filter(|ws| ws.monitor_id == Some(*monitor_id))
                 .for_each(|workspace| {
                     wd.push((
                         workspace.id,
@@ -94,7 +94,7 @@ pub fn collect_data(config: SimpleConfig) -> anyhow::Result<(HyprlandData, Optio
                         height: client.size.1,
                         class: client.class.clone(),
                         workspace: client.workspace.id,
-                        monitor: client.monitor,
+                        monitor: client.monitor.unwrap_or(-1),
                         focus_history_id: client.focus_history_id,
                         title: client.title.clone(),
                         floating: client.floating,
@@ -165,7 +165,7 @@ pub fn collect_data(config: SimpleConfig) -> anyhow::Result<(HyprlandData, Optio
             Some((
                 a.class.clone(),
                 a.workspace.id,
-                a.monitor,
+                a.monitor.unwrap_or(-1),
                 a.address.clone(),
             ))
         },

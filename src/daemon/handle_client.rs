@@ -3,7 +3,7 @@ use crate::daemon::handle_fns::{close, init, switch};
 use crate::envs::SYSTEMD_SERVICE;
 use crate::{get_socket_path_buff, global, toast, Share, Transfer, TransferType};
 use anyhow::Context;
-use rand::Rng;
+use rand::RngExt;
 use std::env;
 use std::fs::remove_file;
 use std::io::{BufRead, BufReader, Write};

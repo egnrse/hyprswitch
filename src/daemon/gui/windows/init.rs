@@ -29,7 +29,7 @@ pub fn init_windows(
             .iter()
             .filter(|(_, v)| show_workspaces_on_all_monitors || v.monitor == monitor_data.id)
             .collect::<Vec<_>>();
-        workspaces.sort_by(|(a, _), (b, _)| a.cmp(b));
+		workspaces.sort_by_key(|(a, _)| *a);
         workspaces
     };
 

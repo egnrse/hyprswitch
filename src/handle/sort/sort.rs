@@ -45,7 +45,7 @@ pub fn sort_clients(
                     .push(client.workspace);
             }
             // sort workspaces on monitor (and remove duplicates)
-            for (_, ws) in workspaces.iter_mut() {
+			for ws in workspaces.values_mut() {
                 ws.sort();
                 ws.dedup();
                 ws.reverse();
@@ -56,7 +56,7 @@ pub fn sort_clients(
             loop {
                 let mut current_workspaces = vec![];
                 // get one workspace from each monitor
-                for (_, ws) in workspaces.iter_mut() {
+				for ws in workspaces.values_mut() {
                     if let Some(workspace) = ws.pop() {
                         current_workspaces.push(workspace);
                     }

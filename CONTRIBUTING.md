@@ -24,7 +24,6 @@ src/          source tree
 └─ handle/    event handling, switching logic
 config/       example/default config
 imgs/         visuals for docs and README
-nix/          nix stuff
 systemd/      experimental systemd support
 test-svgs/    svg outputs for test
 .idea/        my notes and ideas

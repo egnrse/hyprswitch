@@ -68,16 +68,6 @@ paru -S hyprswitch
 yay -S hyprswitch
 ```
 
-### Nixos
-
-(I dont use nixos, this is not tested.)
-
-- add ``hyprswitch.url = "github:egnrse/hyprswitch/release";`` to flake inputs
-- add `specialArgs = { inherit inputs; };` to `nixpkgs.lib.nixosSystem`
-- add `inputs.hyprswitch.packages.x86_64-linux.default` to your `environment.systemPackages`
-- available systems: `aarch64-linux`, `i686-linux`, `riscv32-linux`, `riscv64-linux`, `x86_64-linux`
-
-
 ## Usage
 
 To use the GUI, you need to start the daemon first with eg. `hyprswitch init`. It is recommended to start the daemon through hyprland by putting `exec-once = hyprswitch init &` into your [hyprland config](https://wiki.hypr.land/Configuring/).

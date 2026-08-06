@@ -2,8 +2,11 @@ name: Rust
 
 on:
   push:
-    branches-ignore:
-      - 'release-please-**'
+    branches:
+      - main
+      - dev
+  pull_request:
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -11,7 +14,6 @@ concurrency:
 
 env:
   CARGO_TERM_COLOR: always
-  CARGO_REGISTRIES_CRATES_IO_PROTOCOL: sparse
 
 jobs:
   build:
@@ -19,7 +21,7 @@ jobs:
     runs-on: "ubuntu-latest"
     steps:
       - uses: actions/checkout@v4
-      - name: install Rust stable
+      - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
       - name: Install gtk4-layer-shell
         working-directory: /tmp
@@ -46,7 +48,7 @@ jobs:
     runs-on: "ubuntu-latest"
     steps:
       - uses: actions/checkout@v4
-      - name: install Rust stable
+      - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
       - name: Install gtk4-layer-shell
         working-directory: /tmp

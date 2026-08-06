@@ -8,7 +8,7 @@
 [![Tests](https://github.com/egnrse/hyprswitch/actions/workflows/rust.yml/badge.svg)](https://github.com/egnrse/hyprswitch/actions/workflows/rust.yml)
 [![GitHub tag (latest SemVer pre-release)](https://img.shields.io/github/v/tag/egnrse/hyprswitch?label=version)](https://github.com/egnrse/hyprswitch/releases)
 
-A rust CLI/GUI to switch between windows in [Hyprland](https://github.com/hyprwm/Hyprland). This repo is a fork of [H3rmt/hyprshell](https://github.com/H3rmt/hyprshell) (look at the `*-hyprswitch` branches).
+A rust CLI/GUI to switch between windows in [Hyprland](https://github.com/hyprwm/Hyprland). This repo is a fork of [H3rmt/hyprshell](https://github.com/H3rmt/hyprshell).
 
 
 ## Features
@@ -52,11 +52,12 @@ cd hyprswitch
 cargo build --locked --release
 ```
 
-The executable will be in `./target/debug/hyprswitch`.
+The executable will be: `./target/release/hyprswitch`
 
 Runtime dependencies:  
 gtk4 [gtk4-layer-shell](https://github.com/wmww/gtk4-layer-shell)
 
+> *Note*: The crate [hyprswitch](https://crates.io/crates/hyprswitch) is deprecated.
 <!-- `cargo install hyprswitch` -->
 
 ### Arch Linux

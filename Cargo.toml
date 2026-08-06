@@ -28,8 +28,8 @@ smart-default = "0.7"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["std", "fmt", "env-filter", "ansi"], default-features = false }
 
-gtk4 = { version = "0.9", default-features = false, features = ["v4_6"] }
-gtk4-layer-shell = { version = "0.4" }
+gtk4 = { version = "0.11", default-features = false, features = ["v4_6"] }
+gtk4-layer-shell = { version = "0.8" }
 
 ron = { version = "0.8", optional = true }
 

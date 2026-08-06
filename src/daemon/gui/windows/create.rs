@@ -52,11 +52,11 @@ pub fn create_windows(
             .default_width(10)
             .build();
         window.init_layer_shell();
-        window.set_namespace("hyprswitch");
+        window.set_namespace(Some("hyprswitch"));
         window.set_layer(Layer::Overlay);
         window.set_keyboard_mode(KeyboardMode::None);
         window.set_anchor(Edge::Bottom, true);
-        window.set_monitor(monitor);
+        window.set_monitor(Some(monitor));
         window.connect_visible_notify(clone!(
             #[strong]
             sender,

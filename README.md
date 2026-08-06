@@ -41,7 +41,7 @@ A rust CLI/GUI to switch between windows in [Hyprland](https://github.com/hyprwm
 
 ## Install
 [![Packaging status](https://repology.org/badge/vertical-allrepos/hyprswitch.svg)](https://repology.org/project/hyprswitch/versions)  
-(Hyprland >= 0.42 required)  
+(Hyprland >= 0.42 required; `hyprctl eval` with the Lua API (`hl.*`) must be available — typical when using `hyprland.lua`.)  
 
 ### From Source
 
@@ -52,7 +52,7 @@ cd hyprswitch
 cargo build --locked --release
 ```
 
-The executable will be in `./target/debug/hyprswitch`.
+The executable will be in `./target/release/hyprswitch`.
 
 Runtime dependencies:  
 gtk4 [gtk4-layer-shell](https://github.com/wmww/gtk4-layer-shell)
@@ -79,17 +79,17 @@ yay -S hyprswitch
 
 ## Usage
 
-To use the GUI, you need to start the daemon first with eg. `hyprswitch init`. It is recommended to start the daemon through hyprland by putting `exec-once = hyprswitch init &` into your [hyprland config](https://wiki.hypr.land/Configuring/).
+To use the GUI, you need to start the daemon first with eg. `hyprswitch init`. It is recommended to start the daemon through hyprland by adding it to your [hyprland config](https://wiki.hypr.land/Configuring/).
 
 Subsequent calls to hyprswitch (with the  `gui`/`dispatch`/`close` commands) will send the command to the daemon which will execute the command and update the GUI.
 
-The following example opens hyprswitch with `SUPER+TAB`, put it in you hyprland config. (prob. in `~/.config/hypr/hyprland.conf`)
-```ini
-exec-once = hyprswitch init --show-title --size-factor 6 --workspaces-per-row 5 &
+The following example opens hyprswitch with `ALT+TAB`, put it in you hyprland config. (prob. in `~/.config/hypr/hyprland.lua`)
+```lua
+-- Initialize the hyprswitch daemon on startup
+hl.dispatch(hl.dsp.exec_cmd("hyprswitch init --show-title &"))
 
-$key = tab
-$mod = super
-bind = $mod, $key, exec, hyprswitch gui --mod-key $mod --key $key
+-- Bind ALT + TAB to open the hyprswitch GUI
+hl.bind("ALT + Tab", hl.dsp.exec_cmd("hyprswitch gui --mod-key alt --key tab"))
 ```
 
 See the [Wiki](https://github.com/egnrse/hyprswitch/wiki/Home#usage) for more infos. You can also find [some examples](https://github.com/egnrse/hyprswitch/wiki/02-%E2%80%90-Examples) in it.

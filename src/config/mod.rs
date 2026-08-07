@@ -15,37 +15,37 @@ mod generate;
 mod validate;
 
 pub fn load() -> anyhow::Result<Config> {
-    let _span = span!(Level::TRACE, "load_config").entered();
-    let config = get_path().context("Failed to get config path")?;
-    let options = Options::default()
-        .with_default_extension(Extensions::IMPLICIT_SOME)
-        .with_default_extension(Extensions::UNWRAP_NEWTYPES)
-        .with_default_extension(Extensions::UNWRAP_VARIANT_NEWTYPES);
-    let file = std::fs::File::open(&config)
-        .with_context(|| format!("Failed to open config at ({config:?})"))?;
-    let config: Config = options
-        .from_reader(file)
-        .context("Failed to read config.ron")?;
+	let _span = span!(Level::TRACE, "load_config").entered();
+	let config = get_path().context("Failed to get config path")?;
+	let options = Options::default()
+		.with_default_extension(Extensions::IMPLICIT_SOME)
+		.with_default_extension(Extensions::UNWRAP_NEWTYPES)
+		.with_default_extension(Extensions::UNWRAP_VARIANT_NEWTYPES);
+	let file = std::fs::File::open(&config)
+		.with_context(|| format!("Failed to open config at ({config:?})"))?;
+	let config: Config = options
+		.from_reader(file)
+		.context("Failed to read config.ron")?;
 
-    Ok(config)
+	Ok(config)
 }
 
 fn get_path() -> Option<PathBuf> {
-    env::var_os("HYPRSWITCH_CONFIG_FILE")
-        .map(PathBuf::from)
-        .or_else(|| {
-            get_config_dir().map(|mut path| {
-                path.push("hyprswitch/config.ron");
-                path
-            })
-        })
+	env::var_os("HYPRSWITCH_CONFIG_FILE")
+		.map(PathBuf::from)
+		.or_else(|| {
+			get_config_dir().map(|mut path| {
+				path.push("hyprswitch/config.ron");
+				path
+			})
+		})
 }
 
 fn get_config_dir() -> Option<PathBuf> {
-    env::var_os("XDG_CONFIG_HOME")
-        .map(PathBuf::from)
-        .or_else(|| {
-            env::var_os("HOME")
-                .map(|home| PathBuf::from(format!("{}/.config", home.to_string_lossy())))
-        })
+	env::var_os("XDG_CONFIG_HOME")
+		.map(PathBuf::from)
+		.or_else(|| {
+			env::var_os("HOME")
+				.map(|home| PathBuf::from(format!("{}/.config", home.to_string_lossy())))
+		})
 }

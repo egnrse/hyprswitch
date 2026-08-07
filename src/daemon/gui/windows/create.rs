@@ -13,76 +13,76 @@ use std::collections::HashMap;
 use tracing::trace;
 
 pub fn create_windows(
-    app: &Application,
-    share: &Share,
-    monitor_data_list: &mut HashMap<ApplicationWindow, (MonitorData, Monitor)>,
-    workspaces_per_row: u32,
-    sender: Sender<bool>,
+	app: &Application,
+	share: &Share,
+	monitor_data_list: &mut HashMap<ApplicationWindow, (MonitorData, Monitor)>,
+	workspaces_per_row: u32,
+	sender: Sender<bool>,
 ) -> anyhow::Result<()> {
-    let monitors = get_monitors();
-    let gtk_monitors = Display::default()
-        .context("Could not connect to a display")?
-        .monitors()
-        .iter()
-        .filter_map(|m| m.ok())
-        .collect::<Vec<Monitor>>();
+	let monitors = get_monitors();
+	let gtk_monitors = Display::default()
+		.context("Could not connect to a display")?
+		.monitors()
+		.iter()
+		.filter_map(|m| m.ok())
+		.collect::<Vec<Monitor>>();
 
-    for monitor in &gtk_monitors {
-        let monitor_id = monitors
-            .iter()
-            .find(|m| m.name == monitor.connector().unwrap_or_default())
-            .map(|m| m.id)
-            .unwrap_or_default();
+	for monitor in &gtk_monitors {
+		let monitor_id = monitors
+			.iter()
+			.find(|m| m.name == monitor.connector().unwrap_or_default())
+			.map(|m| m.id)
+			.unwrap_or_default();
 
-        let workspaces_flow = FlowBox::builder()
-            .selection_mode(SelectionMode::None)
-            .orientation(Orientation::Horizontal)
-            .max_children_per_line(workspaces_per_row)
-            .min_children_per_line(workspaces_per_row)
-            .build();
-        let workspaces_flow_overlay = Overlay::builder().child(&workspaces_flow).build();
+		let workspaces_flow = FlowBox::builder()
+			.selection_mode(SelectionMode::None)
+			.orientation(Orientation::Horizontal)
+			.max_children_per_line(workspaces_per_row)
+			.min_children_per_line(workspaces_per_row)
+			.build();
+		let workspaces_flow_overlay = Overlay::builder().child(&workspaces_flow).build();
 
-        workspaces_flow_overlay.add_controller(click_monitor(share, monitor_id));
+		workspaces_flow_overlay.add_controller(click_monitor(share, monitor_id));
 
-        let window = ApplicationWindow::builder()
-            .css_classes(vec!["window", "monitor", "background"])
-            .application(app)
-            .child(&workspaces_flow_overlay)
-            .default_height(10)
-            .default_width(10)
-            .build();
-        window.init_layer_shell();
-        window.set_namespace(Some("hyprswitch"));
-        window.set_layer(Layer::Overlay);
-        window.set_keyboard_mode(KeyboardMode::None);
-        window.set_anchor(Edge::Bottom, true);
-        window.set_monitor(Some(monitor));
-        window.connect_visible_notify(clone!(
-            #[strong]
-            sender,
-            move |window| {
-                sender
-                    .send_blocking(window.is_visible())
-                    .warn("Failed to send window visibility");
-            }
-        ));
+		let window = ApplicationWindow::builder()
+			.css_classes(vec!["window", "monitor", "background"])
+			.application(app)
+			.child(&workspaces_flow_overlay)
+			.default_height(10)
+			.default_width(10)
+			.build();
+		window.init_layer_shell();
+		window.set_namespace(Some("hyprswitch"));
+		window.set_layer(Layer::Overlay);
+		window.set_keyboard_mode(KeyboardMode::None);
+		window.set_anchor(Edge::Bottom, true);
+		window.set_monitor(Some(monitor));
+		window.connect_visible_notify(clone!(
+			#[strong]
+			sender,
+			move |window| {
+				sender
+					.send_blocking(window.is_visible())
+					.warn("Failed to send window visibility");
+			}
+		));
 
-        monitor_data_list.insert(
-            window,
-            (
-                MonitorData {
-                    connector: monitor.connector().unwrap_or_default(),
-                    id: monitor_id,
-                    workspaces_flow,
-                    workspaces_flow_overlay: (workspaces_flow_overlay, None),
-                    workspace_refs: HashMap::new(),
-                    client_refs: HashMap::new(),
-                },
-                monitor.clone(),
-            ),
-        );
-        trace!("Created window for monitor {:?}", monitor.connector());
-    }
+		monitor_data_list.insert(
+			window,
+			(
+				MonitorData {
+					connector: monitor.connector().unwrap_or_default(),
+					id: monitor_id,
+					workspaces_flow,
+					workspaces_flow_overlay: (workspaces_flow_overlay, None),
+					workspace_refs: HashMap::new(),
+					client_refs: HashMap::new(),
+				},
+				monitor.clone(),
+			),
+		);
+		trace!("Created window for monitor {:?}", monitor.connector());
+	}
 
-    Ok(())
+	Ok(())
 }

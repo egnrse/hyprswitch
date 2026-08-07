@@ -1,7 +1,7 @@
 use std::time::Instant;
 
 use crate::handle::sort::tests::{
-    client_vec, create_svg_from_client_tests, function, is_sorted, monitor_map, workspace_map,
+	client_vec, create_svg_from_client_tests, function, is_sorted, monitor_map, workspace_map,
 };
 use crate::handle::sort::{sort_clients, update_clients};
 
@@ -23,30 +23,30 @@ use crate::handle::sort::{sort_clients, update_clients};
 /// ```
 #[test]
 fn many_1() {
-    let monitor_data = monitor_map![(0, 0, 12, 10),];
-    let workspace_data = workspace_map![(0, 0, 0),];
-    let clients = client_vec![
-        (1, 1, 2, 3, 0, 0),
-        (5, 3, 1, 2, 0, 0),
-        (8, 2, 2, 2, 0, 0),
-        (2, 6, 2, 4, 0, 0),
-        (7, 8, 2, 2, 0, 0),
-        (8, 5, 2, 2, 0, 0),
-        (11, 1, 1, 8, 0, 0),
-    ];
-    let len = clients.len();
-    let update = Instant::now();
+	let monitor_data = monitor_map![(0, 0, 12, 10),];
+	let workspace_data = workspace_map![(0, 0, 0),];
+	let clients = client_vec![
+		(1, 1, 2, 3, 0, 0),
+		(5, 3, 1, 2, 0, 0),
+		(8, 2, 2, 2, 0, 0),
+		(2, 6, 2, 4, 0, 0),
+		(7, 8, 2, 2, 0, 0),
+		(8, 5, 2, 2, 0, 0),
+		(11, 1, 1, 8, 0, 0),
+	];
+	let len = clients.len();
+	let update = Instant::now();
 
-    let clients = update_clients(clients, Some(&workspace_data), Some(&monitor_data));
-    println!("updated clients: {clients:?} ({:?})", update.elapsed());
+	let clients = update_clients(clients, Some(&workspace_data), Some(&monitor_data));
+	println!("updated clients: {clients:?} ({:?})", update.elapsed());
 
-    let start = Instant::now();
-    let clients = sort_clients(clients, false, false);
-    println!("{clients:?} ({:?})", start.elapsed());
-    create_svg_from_client_tests(&clients, function!(), monitor_data);
+	let start = Instant::now();
+	let clients = sort_clients(clients, false, false);
+	println!("{clients:?} ({:?})", start.elapsed());
+	create_svg_from_client_tests(&clients, function!(), monitor_data);
 
-    assert_eq!(clients.len(), len);
-    assert!(is_sorted(&clients));
+	assert_eq!(clients.len(), len);
+	assert!(is_sorted(&clients));
 }
 
 /// ```text
@@ -70,30 +70,30 @@ fn many_1() {
 /// ```
 #[test]
 fn many_2() {
-    let monitor_data = monitor_map![(0, 0, 12, 13),];
-    let workspace_data = workspace_map![(0, 0, 0),];
-    let clients = client_vec![
-        (0, 11, 1, 2, 0, 0),
-        (1, 1, 2, 3, 0, 0),
-        (2, 5, 2, 4, 0, 0),
-        (5, 3, 1, 3, 0, 0),
-        (7, 8, 2, 2, 0, 0),
-        (8, 2, 2, 2, 0, 0),
-        (8, 5, 2, 2, 0, 0),
-        (10, 11, 2, 2, 0, 0),
-        (11, 1, 1, 6, 0, 0),
-    ];
-    let len = clients.len();
-    let update = Instant::now();
+	let monitor_data = monitor_map![(0, 0, 12, 13),];
+	let workspace_data = workspace_map![(0, 0, 0),];
+	let clients = client_vec![
+		(0, 11, 1, 2, 0, 0),
+		(1, 1, 2, 3, 0, 0),
+		(2, 5, 2, 4, 0, 0),
+		(5, 3, 1, 3, 0, 0),
+		(7, 8, 2, 2, 0, 0),
+		(8, 2, 2, 2, 0, 0),
+		(8, 5, 2, 2, 0, 0),
+		(10, 11, 2, 2, 0, 0),
+		(11, 1, 1, 6, 0, 0),
+	];
+	let len = clients.len();
+	let update = Instant::now();
 
-    let clients = update_clients(clients, Some(&workspace_data), Some(&monitor_data));
-    println!("updated clients: {clients:?} ({:?})", update.elapsed());
+	let clients = update_clients(clients, Some(&workspace_data), Some(&monitor_data));
+	println!("updated clients: {clients:?} ({:?})", update.elapsed());
 
-    let start = Instant::now();
-    let clients = sort_clients(clients, false, false);
-    println!("{clients:?} ({:?})", start.elapsed());
-    create_svg_from_client_tests(&clients, function!(), monitor_data);
+	let start = Instant::now();
+	let clients = sort_clients(clients, false, false);
+	println!("{clients:?} ({:?})", start.elapsed());
+	create_svg_from_client_tests(&clients, function!(), monitor_data);
 
-    assert_eq!(clients.len(), len);
-    assert!(is_sorted(&clients));
+	assert_eq!(clients.len(), len);
+	assert!(is_sorted(&clients));
 }

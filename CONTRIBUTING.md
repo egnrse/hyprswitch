@@ -6,6 +6,7 @@ Some notes for myself and contributors.
 cargo build --all-targets --all-features
 cargo test --all-features -- --include-ignored
 cargo clippy --all-targets --all-features
+cargo fmt --check
 
 # try stuff
 cargo run -- init --show-title --size-factor 6 --workspaces-per-row 5

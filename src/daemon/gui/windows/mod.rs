@@ -1,7 +1,7 @@
+pub mod click;
 mod create;
 mod init;
 mod update;
-pub mod click;
 
 pub use create::create_windows;
 pub use init::init_windows;

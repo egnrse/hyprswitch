@@ -1,6 +1,6 @@
+use crate::cli::shared;
 use crate::SimpleConfig;
 use clap::Args;
-use crate::cli::shared;
 
 #[derive(Args, Debug, Clone)]
 pub struct SimpleConf {

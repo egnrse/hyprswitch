@@ -14,15 +14,15 @@ pub(crate) fn switch(
 ) -> anyhow::Result<()> {
     let (latest, send, receive) = share.deref();
     {
-		let mut lock = latest.lock().expect("Failed to lock");
-		let active = find_next(
-			&lock.simple_config.switch_type,
-			dispatch_config,
-			&lock.hypr_data,
-			lock.active.as_ref(),
-		)?;
-		lock.active = Some(active);
-		drop(lock);
+        let mut lock = latest.lock().expect("Failed to lock");
+        let active = find_next(
+            &lock.simple_config.switch_type,
+            dispatch_config,
+            &lock.hypr_data,
+            lock.active.as_ref(),
+        )?;
+        lock.active = Some(active);
+        drop(lock);
     }
 
     trace!("Sending refresh to GUI");
@@ -101,23 +101,23 @@ pub(crate) fn close(share: &Share, kill: bool, client_id: u8) -> anyhow::Result<
         .expect("Failed to lock")) = false;
 
     if !kill {
-		let lock = latest.lock().expect("Failed to lock");
-		drop(lock); // drop lock before sending hide
+        let lock = latest.lock().expect("Failed to lock");
+        drop(lock); // drop lock before sending hide
 
-		trace!("Sending hide to GUI");
-		send.send_blocking((GUISend::Hide, UpdateCause::Client(client_id)))
-			.context("Unable to hide the GUI")?;
-		let rec = receive
-			.recv_blocking()
-			.context("Unable to receive GUI update")?;
-		trace!("Received hide finish from GUI: {rec:?}");
+        trace!("Sending hide to GUI");
+        send.send_blocking((GUISend::Hide, UpdateCause::Client(client_id)))
+            .context("Unable to hide the GUI")?;
+        let rec = receive
+            .recv_blocking()
+            .context("Unable to receive GUI update")?;
+        trace!("Received hide finish from GUI: {rec:?}");
 
-		// switch after closing gui
-		// (KeyboardMode::Exclusive on launcher doesn't allow switching windows if it is still active)
-		let lock = latest.lock().expect("Failed to lock");
-		switch_to_active(lock.active.as_ref(), &lock.hypr_data)?;
-		drop(lock);
-	} else {
+        // switch after closing gui
+        // (KeyboardMode::Exclusive on launcher doesn't allow switching windows if it is still active)
+        let lock = latest.lock().expect("Failed to lock");
+        switch_to_active(lock.active.as_ref(), &lock.hypr_data)?;
+        drop(lock);
+    } else {
         info!("Not executing switch on close, killing");
 
         trace!("Sending hide to GUI");

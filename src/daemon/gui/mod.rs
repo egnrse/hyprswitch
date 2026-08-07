@@ -3,12 +3,10 @@ use anyhow::Context;
 use async_channel::{Receiver, RecvError, Sender};
 use gtk4::gdk::{Display, Monitor};
 use gtk4::glib::{clone, GString};
-use gtk4::prelude::{
-    ApplicationExt, ApplicationExtManual, GtkWindowExt, WidgetExt,
-};
+use gtk4::prelude::{ApplicationExt, ApplicationExtManual, GtkWindowExt, WidgetExt};
 use gtk4::{
-    glib, style_context_add_provider_for_display, Application, ApplicationWindow, CssProvider, FlowBox, Label, Overlay, STYLE_PROVIDER_PRIORITY_APPLICATION,
-    STYLE_PROVIDER_PRIORITY_USER,
+    glib, style_context_add_provider_for_display, Application, ApplicationWindow, CssProvider,
+    FlowBox, Label, Overlay, STYLE_PROVIDER_PRIORITY_APPLICATION, STYLE_PROVIDER_PRIORITY_USER,
 };
 use gtk4_layer_shell::{Edge, LayerShell};
 use hyprland::shared::{Address, MonitorId, WorkspaceId};
@@ -54,7 +52,6 @@ pub(super) fn start_gui_blocking(
         init_icon_map();
 
         apply_css(init_config.custom_css.as_ref());
-
 
         let (visibility_sender, visibility_receiver) = async_channel::unbounded();
         let monitor_data_list: Rc<Mutex<HashMap<ApplicationWindow, (MonitorData, Monitor)>>> =
@@ -135,8 +132,7 @@ async fn handle_update(
                         }
                     }
 
-					window.set_anchor(Edge::Bottom, false);
-                    
+                    window.set_anchor(Edge::Bottom, false);
 
                     trace!("Showing window {:?}", window);
                     windows += 1;
@@ -246,7 +242,6 @@ fn apply_css(custom_css: Option<&PathBuf>) {
         }
     }
 }
-
 
 pub struct MonitorData {
     id: MonitorId,

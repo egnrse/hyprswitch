@@ -27,7 +27,7 @@ fn test_cli_help_flag() {
     assert!(output.status.success());
     let _stdout = String::from_utf8_lossy(&output.stdout);
     let stderr = String::from_utf8_lossy(&output.stderr);
-	// maybe change it to stdout at some point
+    // maybe change it to stdout at some point
     assert!(stderr.contains("hyprswitch"));
     assert!(stderr.contains("Usage:"));
 }
@@ -36,7 +36,7 @@ fn test_cli_help_flag() {
 #[ignore = "Requires a running Hyprland instance"]
 fn test_cli_subcommand_dry_run() {
     let bin = get_bin_path();
-    
+
     // Testing simple mode with dry-run
     let output = Command::new(&bin)
         .args(["simple", "--dry-run", "--offset", "1"])
@@ -49,7 +49,7 @@ fn test_cli_subcommand_dry_run() {
 #[test]
 fn test_cli_missing_required_args() {
     let bin = get_bin_path();
-    
+
     // Calling `gui` without required `--mod-key` and `--key` should fail gracefully
     let output = Command::new(&bin)
         .arg("gui")

@@ -107,8 +107,8 @@ pub enum Command {
 
 /// only show error if not caused by --help or --version
 pub fn check_invalid_inputs(e: &clap::Error) -> bool {
-	matches!(e.kind(), 
-        clap::error::ErrorKind::DisplayHelp |
-        clap::error::ErrorKind::DisplayVersion
+    matches!(
+        e.kind(),
+        clap::error::ErrorKind::DisplayHelp | clap::error::ErrorKind::DisplayVersion
     )
 }

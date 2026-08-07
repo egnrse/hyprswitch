@@ -38,7 +38,9 @@ pub fn find_next(
                     None
                 },
             )
-            .with_context(|| format!("Failed to find next client with dispatch_config {dispatch_config:?}"))?;
+            .with_context(|| {
+                format!("Failed to find next client with dispatch_config {dispatch_config:?}")
+            })?;
             info!("Next client: {:?}", addr);
             Ok(Active::Client(addr.clone()))
         }
@@ -52,7 +54,9 @@ pub fn find_next(
                     None
                 },
             )
-            .with_context(|| format!("Failed to find next workspace with dispatch_config {dispatch_config:?}"))?;
+            .with_context(|| {
+                format!("Failed to find next workspace with dispatch_config {dispatch_config:?}")
+            })?;
             info!("Next workspace: {:?}", workspace_id);
             Ok(Active::Workspace(*workspace_id))
         }
@@ -66,7 +70,9 @@ pub fn find_next(
                     None
                 },
             )
-            .with_context(|| format!("Failed to find next monitor with dispatch_config {dispatch_config:?}"))?;
+            .with_context(|| {
+                format!("Failed to find next monitor with dispatch_config {dispatch_config:?}")
+            })?;
             info!("Next monitor: {:?}", monitor_id);
             Ok(Active::Monitor(*monitor_id))
         }

@@ -35,7 +35,6 @@ pub(crate) fn gui_set_monitor(share: &Share, id: MonitorId) {
     }
 }
 
-
 pub(crate) fn gui_close(share: &Share) {
     thread::spawn(clone!(
         #[strong]

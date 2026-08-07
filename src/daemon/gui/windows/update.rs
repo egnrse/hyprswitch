@@ -1,7 +1,7 @@
-use std::cmp::min;
-use gtk4::Align;
-use crate::{Active, SharedData};
 use crate::daemon::gui::MonitorData;
+use crate::{Active, SharedData};
+use gtk4::Align;
+use std::cmp::min;
 
 macro_rules! update_type {
     (

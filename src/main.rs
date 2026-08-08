@@ -122,7 +122,7 @@ fn main() -> anyhow::Result<()> {
 			reverse_key,
 		} => {
 			if !client::daemon_running() {
-				toast("Daemon not running (add ``exec-once = hyprswitch init &`` to your Hyprland config or run ``hyprswitch init &`` it in a terminal)\nvisit https://github.com/egnrse/hyprswitch/wiki/Examples to see Example configs");
+				toast("Daemon not running (run eg. 'hyprswitch init &' in a terminal or start it in your hyprland config)\nvisit https://github.com/egnrse/hyprswitch/wiki/ to see example configs");
 				return Err(anyhow::anyhow!("Daemon not running"));
 			}
 			// client::send_version_check_command()

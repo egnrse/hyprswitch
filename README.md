@@ -36,12 +36,13 @@ A rust CLI/GUI to switch between windows in [Hyprland](https://github.com/hyprwm
 - [Theming](#theming)
 - [Other](#other)
 	- [Experimental Environment Variables](#experimental-environment-variables)
+	- [Migration to 5.0.0](#migration-to-500)
 	- [Migration to 3.0.0](#migration-to-300)
 
 
 ## Install
 [![Packaging status](https://repology.org/badge/vertical-allrepos/hyprswitch.svg)](https://repology.org/project/hyprswitch/versions)  
-(Hyprland >= 0.42 required)  
+(Hyprland >= 0.55 with Lua API required)  
 
 ### From Source
 
@@ -74,13 +75,13 @@ To use the GUI, you need to start the daemon first with eg. `hyprswitch init`. I
 
 Subsequent calls to hyprswitch (with the  `gui`/`dispatch`/`close` commands) will send the command to the daemon which will execute the command and update the GUI.
 
-The following example opens hyprswitch with `SUPER+TAB`, put it in you hyprland config. (prob. in `~/.config/hypr/hyprland.conf`)
-```ini
-exec-once = hyprswitch init --show-title --size-factor 6 --workspaces-per-row 5 &
+The following example opens hyprswitch with `SUPER+TAB`, put it in your hyprland config. (prob. in `~/.config/hypr/hyprland.lua`)
+```lua
+-- Initialize the hyprswitch daemon on startup
+hl.dispatch(hl.dsp.exec_cmd("hyprswitch init --show-title"))
 
-$key = tab
-$mod = super
-bind = $mod, $key, exec, hyprswitch gui --mod-key $mod --key $key
+-- Bind SUPER + TAB to open the hyprswitch GUI
+hl.bind("SUPER + TAB", hl.dsp.exec_cmd("hyprswitch gui --mod-key SUPER --key TAB"))
 ```
 
 See the [Wiki](https://github.com/egnrse/hyprswitch/wiki/Home#usage) for more infos. You can also find [some examples](https://github.com/egnrse/hyprswitch/wiki/02-%E2%80%90-Examples) in it.
@@ -144,6 +145,18 @@ These variables are subject to change and might be removed in the future (activa
 
 - `REMOVE_HTML_FROM_WORKSPACE_NAME` bool [default: true]: Remove HTML tag (currently only `<span>{}</span>`) from workspace name
 - `DISABLE_TOASTS` bool [default: false]: Disable toasts when errors in the daemon or keybinds are detected
+
+### Migration to 5.0.0
+
+Hyprland has switched from hyprlang to lua, this also changes the API hyprswitch uses. If you are still using a `hyprland.conf` DO NOT switch to the versions 5+, it will not work for you.
+
+1. update your hyprland config to lua
+	- change `exec [...]` to `hl.dispatch(hl.dsp.exec_cmd([...]))`
+	- change modifiers to SCREAMING_SNAKE_CASE in hyprswitch commands (eg. `super_l` -> `SUPER_L`)
+2. update hyprswitch (to 5.0.0 or higher)
+3. thats it
+
+> For old versions see the branch: `old-preLuaAPI`
 
 ### Migration to 3.0.0
 

@@ -4,7 +4,7 @@
 # This is a fork of the original hyprswitch as it got renamed to hyprshell!
 
 pkgname=hyprswitch
-pkgver=4.1.0
+pkgver=5.0.0
 pkgrel=1
 pkgdesc="A CLI/GUI that allows switching between windows in Hyprland"
 arch=('any')

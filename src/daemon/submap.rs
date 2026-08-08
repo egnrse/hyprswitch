@@ -200,7 +200,7 @@ pub(super) fn generate_submap(
 
 		#[cfg(debug_assertions)]
 		bind(
-			"alt",
+			get_mod_from_mod_key(ModKey::AltR),
 			"o",
 			"kill $(pidof hyprswitch) && hyprctl dispatch submap reset",
 			false,
@@ -259,9 +259,9 @@ pub fn deactivate_submap() {
 
 fn get_mod_from_mod_key(mod_key: ModKey) -> &'static str {
 	match mod_key {
-		ModKey::SuperL | ModKey::SuperR => "super",
-		ModKey::AltL | ModKey::AltR => "alt",
-		ModKey::CtrlL | ModKey::CtrlR => "ctrl",
-		ModKey::ShiftL | ModKey::ShiftR => "shift",
+		ModKey::SuperL | ModKey::SuperR => "SUPER",
+		ModKey::AltL | ModKey::AltR => "ALT",
+		ModKey::CtrlL | ModKey::CtrlR => "CTRL",
+		ModKey::ShiftL | ModKey::ShiftR => "SHIFT",
 	}
 }

@@ -56,7 +56,7 @@ impl From<InputSwitchType> for SwitchType {
 }
 
 #[derive(ValueEnum, Clone, Debug)]
-#[clap(rename_all = "snake_case")]
+#[clap(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum InputModKey {
 	// = alt_l
 	Alt,

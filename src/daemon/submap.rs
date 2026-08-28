@@ -46,7 +46,7 @@ pub(super) fn generate_submap(
 		// Helper closure to format bind easily to lua
 		let mut bind = |mods: &str, k: &str, cmd: &str, rt: bool| {
 			let opts = if rt {
-				", { release = true, transparent = true }"
+				", { release = true, transparent = true, submap_universal = true }"
 			} else {
 				""
 			};
@@ -83,7 +83,7 @@ pub(super) fn generate_submap(
 				match reverse_key.clone() {
 					ReverseKey::Mod(modkey) => {
 						bind(
-							&format!("{} {}", main_mod, modkey),
+							&format!("{} + {}", main_mod, modkey),
 							&key,
 							&format!("{} dispatch -r", current_exe),
 							false,
@@ -120,7 +120,7 @@ pub(super) fn generate_submap(
 				);
 				if let ReverseKey::Mod(modkey) = reverse_key.clone() {
 					bind(
-						&format!("{} {}", main_mod, modkey),
+						&format!("{} + {}", main_mod, modkey),
 						&mod_key.to_string(),
 						&format!("{} close", current_exe),
 						true,
@@ -145,7 +145,7 @@ pub(super) fn generate_submap(
 					);
 					if let ReverseKey::Mod(modkey) = reverse_key.clone() {
 						bind(
-							&format!("{} {}", main_mod, modkey),
+							&format!("{} + {}", main_mod, modkey),
 							&i.to_string(),
 							&format!("{} dispatch -o={} -r", current_exe, i),
 							false,

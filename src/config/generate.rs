@@ -75,7 +75,7 @@ fn generate_other(params: &mut Vec<String>, other: &Other) {
 
 fn bind(mods: &str, k: &str, cmd: &str, rt: bool) -> String {
 	let opts = if rt {
-		", { release = true, transparent = true }"
+		", { release = true, transparent = true, submap_universal = true }"
 	} else {
 		""
 	};
@@ -267,7 +267,7 @@ fn generate_hold(
 			false,
 		)),
 		Reverse::Mod(modk) => script_lines.push(bind(
-			&format!("{} {}", hold.open.modifier, modk),
+			&format!("{} + {}", hold.open.modifier, modk),
 			&hold.navigate.forward.to_string(),
 			&format!(
 				"{} gui-no-submap {} && {} dispatch --reverse",
@@ -314,7 +314,7 @@ fn generate_hold(
 		Reverse::Mod(modk) => script_lines.push(format!(
 			"    {}",
 			bind(
-				&format!("{} {}", hold.open.modifier, modk),
+				&format!("{} + {}", hold.open.modifier, modk),
 				&hold.navigate.forward.to_string(),
 				&format!("{} dispatch --reverse", current_exe),
 				false
@@ -335,7 +335,7 @@ fn generate_hold(
 		script_lines.push(format!(
 			"    {}",
 			bind(
-				&format!("{} {}", hold.open.modifier, modk),
+				&format!("{} + {}", hold.open.modifier, modk),
 				&hold.navigate.forward.to_string(),
 				&format!("{} close", current_exe),
 				true
@@ -360,7 +360,7 @@ fn generate_hold(
 			script_lines.push(format!(
 				"    {}",
 				bind(
-					&format!("{} {}", hold.open.modifier, modk),
+					&format!("{} + {}", hold.open.modifier, modk),
 					&i.to_string(),
 					&format!(
 						"{} dispatch --offset={} --reverse && {} close",

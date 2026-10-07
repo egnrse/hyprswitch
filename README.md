@@ -18,14 +18,6 @@ A rust CLI/GUI to switch between windows in [Hyprland](https://github.com/hyprwm
 - customize looks with CSS
 - customize keybindings
 
-### Experimental Features
-
-- support for plugging in new monitors while running [only when run as systemd service]
-- automatically restart when version changes [only when run as systemd service]
-- create all binds and configs from a single config file
-- TODO: add more experimental features to this list
-
-
 ![image.png](imgs/image_4.png)
 
 ## Table of Contents
@@ -37,7 +29,6 @@ A rust CLI/GUI to switch between windows in [Hyprland](https://github.com/hyprwm
 - [Other](#other)
 	- [Experimental Environment Variables](#experimental-environment-variables)
 	- [Migration to 5.0.0](#migration-to-500)
-	- [Migration to 3.0.0](#migration-to-300)
 
 
 ## Install
@@ -71,11 +62,11 @@ yay -S hyprswitch
 
 ## Usage
 
-To use the GUI, you need to start the daemon first with eg. `hyprswitch init`. It is recommended to start the daemon through hyprland by putting `exec-once = hyprswitch init &` into your [hyprland config](https://wiki.hypr.land/Configuring/).
+To use the GUI, you need to start the daemon first with eg. `hyprswitch init`. It is recommended to start the daemon through hyprland.
 
-Subsequent calls to hyprswitch (with the  `gui`/`dispatch`/`close` commands) will send the command to the daemon which will execute the command and update the GUI.
+Subsequent calls to hyprswitch (with the `gui`/`dispatch`/`close` subcommands) will send the command to the daemon which will execute the command and update the GUI.
 
-The following example opens hyprswitch with `SUPER+TAB`, put it in your hyprland config. (prob. in `~/.config/hypr/hyprland.lua`)
+The following example opens hyprswitch with `SUPER+TAB`. Put it in your [hyprland config](https://wiki.hypr.land/Configuring/) (prob. in `~/.config/hypr/hyprland.lua`).
 ```lua
 -- Initialize the hyprswitch daemon on startup
 -- (https://wiki.hypr.land/Configuring/Basics/Autostart/)
@@ -88,7 +79,7 @@ end)
 hl.bind("SUPER + TAB", hl.dsp.exec_cmd("hyprswitch gui --mod-key SUPER --key TAB"))
 ```
 
-See the [Wiki](https://github.com/egnrse/hyprswitch/wiki/Home#usage) for more infos. You can also find [some examples](https://github.com/egnrse/hyprswitch/wiki/02-%E2%80%90-Examples) in it.
+See the [Wiki](https://github.com/egnrse/hyprswitch/wiki/Home#usage) for more infos. You can also find [some examples](https://github.com/egnrse/hyprswitch/wiki/Examples) in it.
 
 
 ## Parameters
@@ -107,9 +98,9 @@ For a fuller list see the [Wiki](https://github.com/egnrse/hyprswitch/wiki/Home#
 - `gui` opens the GUI
     - `--mod-key <MODIFIER>` [required] the modifier key used to open the GUI  
 	Options: super/super_l/super_r, alt/alt_l/alt_r, ctrl/ctrl_l/ctrl_r  
-	(You might want to use a variable, see [Examples](#examples))
+	(You might want to use a variable, see [Examples](https://github.com/egnrse/hyprswitch/wiki/Examples))
     - `--key <KEY>` [required] the key to used to open the GUI (eg. tab)  
-	(You might want to use a variable, see [Examples](#examples))
+	(You might want to use a variable, see [Examples](https://github.com/egnrse/hyprswitch/wiki/Examples))
     - `--reverse-key <KEYTYPE>=<KEY>` [default=`mod=shift`] the key used for reverse switching  
 	Format: `reverse-key=mod=<MODIFIER>` or `reverse-key=key=<KEY>`  
 	(eg. `--reverse-key=mod=shift`, `--reverse-key=key=grave`)
@@ -123,7 +114,7 @@ For a fuller list see the [Wiki](https://github.com/egnrse/hyprswitch/wiki/Home#
 
 
 ## Theming
-Point the daemon to you custom css file with the `--custom-css` argument. (eg. `hyprswitch init --custom-css $HOME/test.css`)
+Point the daemon to your custom css file with the `--custom-css` argument. (eg. `hyprswitch init --custom-css $HOME/test.css`)
 
 CSS Variables:
 ```css
@@ -138,7 +129,7 @@ CSS Variables:
 }
 ```
 
-See the [Wiki](https://github.com/egnrse/hyprswitch/wiki/01-%E2%80%90-Theming) for more info or look at [default.css](src/daemon/gui/defaults.css) and [windows.css](src/daemon/gui/windows/windows.css) for the default CSS styles.
+See the [Wiki](https://github.com/egnrse/hyprswitch/wiki/Theming) for more info or look at [default.css](src/daemon/gui/defaults.css) and [windows.css](src/daemon/gui/windows/windows.css) for the default CSS styles.
 
 
 ## Other
@@ -158,12 +149,4 @@ Hyprland has switched from hyprlang to lua, this also changes the API hyprswitch
 2. change modifiers to SCREAMING_SNAKE_CASE (eg. `super_l` -> `SUPER_L`)
 3. afterwards update hyprswitch (to 5.0.0 or higher)
 
-See the [Wiki](https://github.com/egnrse/hyprswitch/wiki/Migration-to-5.0.0) for more details.
-
-### Migration to 3.0.0
-
-1. The complex Config has been removed in favor of a simpler config.
-2. More GUI - CLI options added. (`--mod-key` / `--switch-type` / ...)
-3. Removed some cli args. (`--do-initial-execute`, `--stay-open-on-close`)
-
-See [Wiki](https://github.com/egnrse/hyprswitch/wiki/Migration-from-2.x.x-to-3.0.0) for more details.
+See the [Wiki](https://github.com/egnrse/hyprswitch/wiki/Migrations#500) for more details.

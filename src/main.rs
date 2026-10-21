@@ -57,16 +57,6 @@ fn main() -> anyhow::Result<()> {
 		.expect("unable to set ACTIVE (already filled???)");
 
 	match cli.command {
-		#[cfg(feature = "config")]
-		cli::Command::Generate { exe, .. } => {
-			info!("Loading config");
-			let config = hyprswitch::config::load().context("Failed to load config")?;
-			hyprswitch::config::validate(&config).context("Failed to validate config")?;
-			let list = hyprswitch::config::create_binds_and_submaps(exe, config)
-				.context("Failed to create binds and submaps")?;
-			let text = hyprswitch::config::export(list);
-			println!("{}", text);
-		}
 		cli::Command::Init { init_opts } => {
 			info!("Starting daemon");
 			let init_config = InitConfig::from(init_opts);

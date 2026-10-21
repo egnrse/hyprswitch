@@ -15,8 +15,6 @@ use std::sync::{Arc, Mutex};
 use tracing::{info, trace, warn};
 
 pub mod client;
-#[cfg(feature = "config")]
-pub mod config;
 mod configs;
 pub mod daemon;
 mod data;

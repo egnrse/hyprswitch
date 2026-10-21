@@ -43,17 +43,6 @@ pub struct GlobalOpts {
 
 #[derive(Subcommand, Debug, Clone)]
 pub enum Command {
-	#[cfg(feature = "config")]
-	/// Generate the daemon config and all keybinds according to the config file
-	Generate {
-		/// Path to config [default: $XDG_CONFIG_HOME/hyprswitch/config.ron]
-		#[arg(long, short = 'w')]
-		config_file: Option<std::path::PathBuf>,
-
-		/// Specify a path to custom hyprswitch executable [path to current executable]
-		#[arg(long)]
-		exe: Option<std::path::PathBuf>,
-	},
 	/// Initialize and start the Daemon
 	Init {
 		#[clap(flatten)]

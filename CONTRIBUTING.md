@@ -20,15 +20,12 @@ Tests that need a running hyprland instance have `ignore`.
 ```
 src/          source tree
 ├─ cli/       cli stuff (parsing/subcommands)
-├─ config/    config file parsing
 ├─ daemon/    background daemon and GUI management
 └─ handle/    event handling, switching logic
 config/       example/default config
 imgs/         visuals for docs and README
 systemd/      experimental systemd support
 tests/        some tests
-test-svgs/    svg outputs for test
-.idea/        my notes and ideas
 ```
 
 

@@ -2,9 +2,11 @@ use crate::handle::get_recent_clients_map;
 use crate::handle::sort::{sort_clients, update_clients};
 use crate::{Active, ClientData, HyprlandData, MonitorData, SwitchType, WorkspaceData};
 use crate::{FindByFirst, SimpleConfig};
+use crate::{ADDR_EXPECT};
+use crate::{ClientAddress, WorkspaceAddress};
 use hyprland::data::{Client, Clients, Monitors, Workspaces};
 use hyprland::prelude::{HyprData, HyprDataActiveOptional};
-use hyprland::shared::{Address, MonitorId, WorkspaceId};
+use hyprland::shared::MonitorId;
 use tracing::{span, trace, warn, Level};
 
 // type Active = (Option<Address>, Option<WorkspaceId>, Option<MonitorId>);
@@ -13,21 +15,21 @@ pub fn collect_data(config: SimpleConfig) -> anyhow::Result<(HyprlandData, Optio
 	let _span = span!(Level::TRACE, "collect_data").entered();
 	let clients = Clients::get()?
 		.into_iter()
-		.filter(|c| c.workspace.id != -1) // ignore clients on invalid workspaces
-		.filter(|w| config.include_special_workspaces || !w.workspace.id < 0)
+		.filter(|c| !c.workspace.address.as_ref().expect(ADDR_EXPECT).is_empty()) // ignore clients on invalid workspaces
+		.filter(|w| config.include_special_workspaces || !w.workspace.is_special())
 		.collect::<Vec<_>>();
 
 	let monitors = Monitors::get()?;
 
-	// sort and filter all workspaces sorted by ID
+	// sort and filter all workspaces sorted by address
 	let workspaces = {
 		let mut workspaces = Workspaces::get()?
 			.into_iter()
-			.filter(|w| w.id != -1) // filter invalid workspaces
-			.filter(|w| config.include_special_workspaces || !w.id < 0)
+			.filter(|w| !w.address.as_ref().expect(ADDR_EXPECT).is_empty()) // filter invalid workspaces
+			.filter(|w| config.include_special_workspaces || !w.is_special())
 			.collect::<Vec<_>>();
 
-		workspaces.sort_by_key(|a| a.id);
+		workspaces.sort_by_key(|a| a.address.clone());
 		workspaces
 	};
 
@@ -54,7 +56,7 @@ pub fn collect_data(config: SimpleConfig) -> anyhow::Result<(HyprlandData, Optio
 
 	// all workspaces with their data, x and y are the offset of the workspace
 	let mut workspace_data = {
-		let mut wd: Vec<(WorkspaceId, WorkspaceData)> = Vec::with_capacity(workspaces.len());
+		let mut wd: Vec<(WorkspaceAddress, WorkspaceData)> = Vec::with_capacity(workspaces.len());
 
 		for (monitor_id, monitor_data) in monitor_data.iter() {
 			let mut x_offset: i32 = 0;
@@ -63,7 +65,7 @@ pub fn collect_data(config: SimpleConfig) -> anyhow::Result<(HyprlandData, Optio
 				.filter(|ws| ws.monitor_id == Some(*monitor_id))
 				.for_each(|workspace| {
 					wd.push((
-						workspace.id,
+						workspace.address.clone().expect(ADDR_EXPECT).into(),
 						WorkspaceData {
 							x: x_offset,
 							y: monitor_data.y,
@@ -72,6 +74,7 @@ pub fn collect_data(config: SimpleConfig) -> anyhow::Result<(HyprlandData, Optio
 							height: monitor_data.height,
 							width: monitor_data.width,
 							enabled: false, // gets updated later
+							ws: workspace.clone(),
 						},
 					));
 					x_offset += monitor_data.width as i32;
@@ -81,25 +84,26 @@ pub fn collect_data(config: SimpleConfig) -> anyhow::Result<(HyprlandData, Optio
 	};
 
 	let mut client_data = {
-		let mut cd: Vec<(Address, ClientData)> = Vec::with_capacity(clients.len());
+		let mut cd: Vec<(ClientAddress, ClientData)> = Vec::with_capacity(clients.len());
 
 		for client in clients {
-			if workspace_data.find_by_first(&client.workspace.id).is_some() {
+			if workspace_data.find_by_first(&client.workspace.address.clone().expect(ADDR_EXPECT).into()).is_some() {
 				cd.push((
-					client.address.clone(),
+					client.address.clone().into(),
 					ClientData {
 						x: client.at.0,
 						y: client.at.1,
 						width: client.size.0,
 						height: client.size.1,
 						class: client.class.clone(),
-						workspace: client.workspace.id,
+						workspace: client.workspace.address.clone().expect(ADDR_EXPECT).into(),
 						monitor: client.monitor.unwrap_or(-1),
 						focus_history_id: client.focus_history_id,
 						title: client.title.clone(),
 						floating: client.floating,
 						pid: client.pid,
 						enabled: false, // gets updated later
+						ws: client.workspace,
 					},
 				));
 			} else {
@@ -155,18 +159,18 @@ pub fn collect_data(config: SimpleConfig) -> anyhow::Result<(HyprlandData, Optio
 		client_data = update_clients(client_data, None, Some(&monitor_data));
 	}
 
-	workspace_data.sort_by_key(|a| a.0);
+	workspace_data.sort_by_key(|a| a.0.clone());
 	monitor_data.sort_by_key(|a| a.0);
 
 	let active = Client::get_active()?;
-	let active: Option<(String, WorkspaceId, MonitorId, Address)> = active.as_ref().map_or_else(
+	let active: Option<(String, WorkspaceAddress, MonitorId, ClientAddress)> = active.as_ref().map_or_else(
 		|| None,
 		|a| {
 			Some((
 				a.class.clone(),
-				a.workspace.id,
+				a.workspace.address.clone().expect(ADDR_EXPECT).into(),
 				a.monitor.unwrap_or(-1),
-				a.address.clone(),
+				a.address.clone().into(),
 			))
 		},
 	);
@@ -208,7 +212,7 @@ pub fn collect_data(config: SimpleConfig) -> anyhow::Result<(HyprlandData, Optio
 
 	let active = match config.switch_type {
 		SwitchType::Client => active.as_ref().map(|a| a.3.clone()).map(Active::Client),
-		SwitchType::Workspace => active.as_ref().map(|a| a.1).map(Active::Workspace),
+		SwitchType::Workspace => active.as_ref().map(|a| a.1.clone()).map(Active::Workspace),
 		SwitchType::Monitor => active.as_ref().map(|a| a.2).map(Active::Monitor),
 	};
 

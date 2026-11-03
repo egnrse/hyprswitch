@@ -4,7 +4,7 @@ use anyhow::Context;
 use async_channel::{Receiver, Sender};
 use hyprland::data::Version as HyprlandVersion;
 use hyprland::prelude::HyprData;
-use hyprland::shared::{Address, MonitorId, WorkspaceId};
+use hyprland::shared::MonitorId;
 use semver::Version;
 use serde::{Deserialize, Serialize};
 use std::env::var;
@@ -24,8 +24,8 @@ pub mod handle;
 pub use configs::*;
 pub use data::*;
 
-// changed fullscreen types
-const MIN_VERSION: Version = Version::new(0, 42, 0);
+// changed id to address
+const MIN_VERSION: Version = Version::new(0, 57, 0);
 
 pub mod global {
 	/// global variable to store if we are in dry mode
@@ -83,9 +83,9 @@ pub struct Exec {
 
 #[derive(Debug)]
 pub enum Active {
-	Workspace(WorkspaceId),
+	Workspace(WorkspaceAddress),
 	Monitor(MonitorId),
-	Client(Address),
+	Client(ClientAddress),
 }
 
 #[derive(Debug, Default)]

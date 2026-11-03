@@ -1,10 +1,12 @@
 use anyhow::Context;
-use hyprland::data::{Workspace, WorkspaceBasic};
+use hyprland::data::Workspace;
 use hyprland::prelude::HyprDataActive;
-use hyprland::shared::{Address, MonitorId, WorkspaceId};
+use hyprland::shared::MonitorId;
 use tracing::{debug, span, warn, Level};
 
 use crate::{global, Active, FindByFirst, HyprlandData};
+use crate::{ADDR_EXPECT, get_ws};
+use crate::{ClientAddress, WorkspaceAddress};
 
 pub fn switch_to_active(
 	active: Option<&Active>,
@@ -23,10 +25,7 @@ pub fn switch_to_active(
 				.find_by_first(&data.workspace)
 				.context("Workspace data not found")?;
 			switch_workspace(
-				&WorkspaceBasic {
-					id: data.workspace,
-					name: workspace_data.name.clone(),
-				},
+				&get_ws(&data.ws).expect("Workspace not found"),
 				*global::DRY.get().expect("DRY not set"),
 			)
 			.with_context(|| {
@@ -41,10 +40,7 @@ pub fn switch_to_active(
 				.find_by_first(wid)
 				.context("Workspace data not found")?;
 			switch_workspace(
-				&WorkspaceBasic {
-					id: *wid,
-					name: workspace_data.name.clone(),
-				},
+				&workspace_data.ws,
 				*global::DRY.get().expect("DRY not set"),
 			)
 			.with_context(|| {
@@ -81,17 +77,17 @@ fn switch_monitor(monitor_id: &MonitorId, dry_run: bool) -> anyhow::Result<()> {
 	Ok(())
 }
 
-fn switch_workspace(next_workspace: &WorkspaceBasic, dry_run: bool) -> anyhow::Result<()> {
+fn switch_workspace(next_workspace: &Workspace, dry_run: bool) -> anyhow::Result<()> {
 	// check if already on workspace (if so, don't switch because it throws an error `Previous workspace doesn't exist`)
 	let current_workspace = Workspace::get_active();
 	if let Ok(workspace) = current_workspace {
-		if next_workspace.id == workspace.id {
-			debug!("Already on workspace {}", next_workspace.id);
+		if next_workspace.address == workspace.address {
+			debug!("Already on workspace {}", next_workspace.address.as_ref().expect(ADDR_EXPECT));
 			return Ok(());
 		}
 	}
 
-	if next_workspace.id < 0 {
+	if next_workspace.is_special() {
 		toggle_special_workspace(&next_workspace.name, dry_run).with_context(|| {
 			format!(
 				"Failed to execute toggle workspace with name {}",
@@ -99,17 +95,17 @@ fn switch_workspace(next_workspace: &WorkspaceBasic, dry_run: bool) -> anyhow::R
 			)
 		})?;
 	} else {
-		switch_normal_workspace(next_workspace.id, dry_run).with_context(|| {
+		switch_normal_workspace(next_workspace.address.clone().expect(ADDR_EXPECT).into(), dry_run).with_context(|| {
 			format!(
-				"Failed to execute switch workspace with id {}",
-				next_workspace.id
+				"Failed to execute switch workspace with address {}",
+				next_workspace.address.as_ref().expect(ADDR_EXPECT)
 			)
 		})?;
 	}
 	Ok(())
 }
 
-fn switch_client(address: &Address, dry_run: bool) -> anyhow::Result<()> {
+fn switch_client(address: &ClientAddress, dry_run: bool) -> anyhow::Result<()> {
 	if dry_run {
 		#[allow(clippy::print_stdout)]
 		{
@@ -134,7 +130,7 @@ fn switch_client(address: &Address, dry_run: bool) -> anyhow::Result<()> {
 	Ok(())
 }
 
-fn switch_normal_workspace(workspace_id: WorkspaceId, dry_run: bool) -> anyhow::Result<()> {
+fn switch_normal_workspace(workspace_id: WorkspaceAddress, dry_run: bool) -> anyhow::Result<()> {
 	if dry_run {
 		#[allow(clippy::print_stdout)]
 		{

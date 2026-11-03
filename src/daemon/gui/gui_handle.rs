@@ -2,13 +2,14 @@ use crate::daemon::deactivate_submap;
 use crate::daemon::gui::reload_desktop_maps;
 use crate::handle::{clear_recent_clients, switch_to_active};
 use crate::{global, Active, GUISend, Share, UpdateCause, Warn};
+use crate::{ClientAddress, WorkspaceAddress};
 use gtk4::glib::clone;
-use hyprland::shared::{Address, MonitorId, WorkspaceId};
+use hyprland::shared::MonitorId;
 use std::ops::Deref;
 use std::thread;
 use tracing::trace;
 
-pub(crate) fn gui_set_client(share: &Share, address: Address) {
+pub(crate) fn gui_set_client(share: &Share, address: ClientAddress) {
 	let (latest, _, _) = share.deref();
 	{
 		let mut lock = latest.lock().expect("Failed to lock");
@@ -17,7 +18,7 @@ pub(crate) fn gui_set_client(share: &Share, address: Address) {
 	}
 }
 
-pub(crate) fn gui_set_workspace(share: &Share, id: WorkspaceId) {
+pub(crate) fn gui_set_workspace(share: &Share, id: WorkspaceAddress) {
 	let (latest, _, _) = share.deref();
 	{
 		let mut lock = latest.lock().expect("Failed to lock");

@@ -1,8 +1,9 @@
 use anyhow::Context;
-use hyprland::shared::{Address, MonitorId, WorkspaceId};
+use hyprland::shared::MonitorId;
 use tracing::{trace, warn};
 
 use crate::{ClientData, DispatchConfig, MonitorData, WorkspaceData};
+use crate::{ClientAddress, WorkspaceAddress};
 
 pub(crate) fn find_next_monitor<'a>(
 	dispatch_config: &DispatchConfig,
@@ -65,9 +66,9 @@ pub(crate) fn find_next_monitor<'a>(
 
 pub(crate) fn find_next_workspace<'a>(
 	dispatch_config: &DispatchConfig,
-	workspace_data: &'a [(WorkspaceId, WorkspaceData)],
-	selected_id: Option<&WorkspaceId>,
-) -> anyhow::Result<&'a (WorkspaceId, WorkspaceData)> {
+	workspace_data: &'a [(WorkspaceAddress, WorkspaceData)],
+	selected_id: Option<&WorkspaceAddress>,
+) -> anyhow::Result<&'a (WorkspaceAddress, WorkspaceData)> {
 	let filtered_workspaces = workspace_data
 		.iter()
 		.filter(|(_, w)| w.enabled)
@@ -121,9 +122,9 @@ pub(crate) fn find_next_workspace<'a>(
 
 pub(crate) fn find_next_client<'a>(
 	dispatch_config: &DispatchConfig,
-	clients: &'a [(Address, ClientData)],
-	selected_addr: Option<&Address>,
-) -> anyhow::Result<&'a (Address, ClientData)> {
+	clients: &'a [(ClientAddress, ClientData)],
+	selected_addr: Option<&ClientAddress>,
+) -> anyhow::Result<&'a (ClientAddress, ClientData)> {
 	let filtered_clients = clients
 		.iter()
 		.filter(|(_, c)| c.enabled)

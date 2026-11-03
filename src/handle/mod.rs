@@ -4,7 +4,6 @@ use std::sync::{Mutex, OnceLock};
 use anyhow::Context;
 use hyprland::data::{Client, Monitor, Monitors};
 use hyprland::prelude::{HyprData, HyprDataActiveOptional, HyprDataVec};
-use hyprland::shared::Address;
 use tracing::info;
 
 pub use data::collect_data;
@@ -12,6 +11,7 @@ pub use exec::switch_to_active;
 
 use crate::handle::next::{find_next_client, find_next_monitor, find_next_workspace};
 use crate::{Active, DispatchConfig, HyprlandData, SwitchType};
+use crate::{ClientAddress};
 
 mod data;
 mod exec;
@@ -58,7 +58,7 @@ pub fn find_next(
 				format!("Failed to find next workspace with dispatch_config {dispatch_config:?}")
 			})?;
 			info!("Next workspace: {:?}", workspace_id);
-			Ok(Active::Workspace(*workspace_id))
+			Ok(Active::Workspace(workspace_id.clone()))
 		}
 		SwitchType::Monitor => {
 			let (monitor_id, _) = find_next_monitor(
@@ -79,8 +79,8 @@ pub fn find_next(
 	}
 }
 
-fn get_recent_clients_map() -> &'static Mutex<HashMap<Address, i8>> {
-	static MAP_LOCK: OnceLock<Mutex<HashMap<Address, i8>>> = OnceLock::new();
+fn get_recent_clients_map() -> &'static Mutex<HashMap<ClientAddress, i8>> {
+	static MAP_LOCK: OnceLock<Mutex<HashMap<ClientAddress, i8>>> = OnceLock::new();
 	MAP_LOCK.get_or_init(|| Mutex::new(HashMap::new()))
 }
 

@@ -1,7 +1,8 @@
-use hyprland::shared::{Address, MonitorId, WorkspaceId};
+use hyprland::shared::MonitorId;
 use tracing::error;
 
 use crate::{ClientData, FindByFirst, MonitorData, WorkspaceData};
+use crate::{ClientAddress, WorkspaceAddress};
 
 /// updates clients with workspace and monitor data
 /// * 'clients' - Vector of clients to update
@@ -10,10 +11,10 @@ use crate::{ClientData, FindByFirst, MonitorData, WorkspaceData};
 ///
 /// removes offset by monitor, adds offset by workspace (client on monitor 1 and workspace 2 will be moved left by monitor 1 offset and right by workspace 2 offset (workspace width * 2))
 pub fn update_clients(
-	clients: Vec<(Address, ClientData)>,
-	workspace_data: Option<&Vec<(WorkspaceId, WorkspaceData)>>,
+	clients: Vec<(ClientAddress, ClientData)>,
+	workspace_data: Option<&Vec<(WorkspaceAddress, WorkspaceData)>>,
 	monitor_data: Option<&Vec<(MonitorId, MonitorData)>>,
-) -> Vec<(Address, ClientData)> {
+) -> Vec<(ClientAddress, ClientData)> {
 	clients
 		.into_iter()
 		.filter_map(|(a, mut c)| {
@@ -40,8 +41,8 @@ pub fn update_clients(
 			};
 
 			if let (Some((ws_x, ws_y)), Some((md_x, md_y))) = (ws, md) {
-				c.x += (ws_x - md_x) as i16; // move x cord by workspace offset
-				c.y += (ws_y - md_y) as i16; // move y cord by workspace offset
+				c.x += ws_x - md_x; // move x cord by workspace offset
+				c.y += ws_y - md_y; // move y cord by workspace offset
 				Some((a, c))
 			} else {
 				None

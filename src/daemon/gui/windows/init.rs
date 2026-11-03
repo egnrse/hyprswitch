@@ -3,20 +3,20 @@ use crate::daemon::gui::windows::click::{click_client, click_workspace};
 use crate::daemon::gui::MonitorData;
 use crate::envs::REMOVE_HTML_FROM_WORKSPACE_NAME;
 use crate::{ClientData, Share, WorkspaceData};
+use crate::{ClientAddress, WorkspaceAddress};
 use gtk4::{pango, prelude::*, Fixed, Frame, Image, Label, Overflow, Overlay};
-use hyprland::shared::{Address, WorkspaceId};
 use regex::Regex;
 use std::borrow::Cow;
 use std::cmp::min;
 
-fn scale(value: i16, size_factor: f64) -> i32 {
+fn scale(value: i32, size_factor: f64) -> i32 {
 	(value as f64 / 30.0 * size_factor) as i32
 }
 
 pub fn init_windows(
 	share: Share,
-	workspaces_p: &[(WorkspaceId, WorkspaceData)],
-	clients_p: &[(Address, ClientData)],
+	workspaces_p: &[(WorkspaceAddress, WorkspaceData)],
+	clients_p: &[(ClientAddress, ClientData)],
 	monitor_data: &mut MonitorData,
 	show_title: bool,
 	show_workspaces_on_all_monitors: bool,
@@ -29,15 +29,15 @@ pub fn init_windows(
 			.iter()
 			.filter(|(_, v)| show_workspaces_on_all_monitors || v.monitor == monitor_data.id)
 			.collect::<Vec<_>>();
-		workspaces.sort_by_key(|(a, _)| *a);
+		workspaces.sort_by_key(|(a, _)| a.clone());
 		workspaces
 	};
 
 	let regex = Regex::new(r"<span[^>]*>(.*?)</span>").expect("Failed to create regex");
 	for (wid, workspace) in workspaces {
 		let workspace_fixed = Fixed::builder()
-			.width_request(scale(workspace.width as i16, size_factor))
-			.height_request(scale(workspace.height as i16, size_factor))
+			.width_request(scale(workspace.width as i32, size_factor))
+			.height_request(scale(workspace.height as i32, size_factor))
 			.build();
 
 		let id_string = wid.to_string();
@@ -63,16 +63,16 @@ pub fn init_windows(
 				.child(&workspace_frame)
 				.build();
 			// special workspace
-			if *wid < 0 {
+			if workspace.ws.is_special() {
 				workspace_overlay.add_css_class("workspace_special");
 			}
-			workspace_overlay.add_controller(click_workspace(&share, *wid));
+			workspace_overlay.add_controller(click_workspace(&share, wid.clone()));
 			monitor_data.workspaces_flow.insert(&workspace_overlay, -1);
 			workspace_overlay
 		};
 		monitor_data
 			.workspace_refs
-			.insert(*wid, (workspace_overlay, None));
+			.insert(wid.clone(), (workspace_overlay, None));
 
 		let clients = {
 			let mut clients = clients_p
@@ -121,7 +121,7 @@ pub fn init_windows(
 				if match size_factor {
 					..2.5 => false,
 					2.5..3.9 => client.height > 800,
-					_ => client.height > 700 - min(((size_factor - 1.5) * 65.0) as i16, 450),
+					_ => client.height > 700 - min(((size_factor - 1.5) * 65.0) as i32, 450),
 				} {
 					let image = Image::builder()
 						.css_classes(vec!["client-image"])
@@ -149,8 +149,8 @@ pub fn init_windows(
 			};
 			workspace_fixed.put(
 				&client_overlay,
-				scale(client.x - workspace.x as i16, size_factor) as f64,
-				scale(client.y - workspace.y as i16, size_factor) as f64,
+				scale(client.x - workspace.x, size_factor) as f64,
+				scale(client.y - workspace.y, size_factor) as f64,
 			);
 			monitor_data
 				.client_refs

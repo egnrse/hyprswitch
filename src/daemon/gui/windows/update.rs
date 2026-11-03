@@ -138,14 +138,14 @@ fn calc_offset(
 	max_offset: u8,
 	allow_negative_numbers: bool,
 	prefer_higher_positive_number: bool,
-) -> Option<i16> {
+) -> Option<i32> {
 	// println!("Checking for {position} and {selected_client_position} in {total_clients} with offset: {max_offset}");
 	debug_assert!(total_clients > position);
 	debug_assert!(total_clients > selected_client_position);
-	let position = position as i16;
-	let selected_client_position = selected_client_position as i16;
-	let total_clients = total_clients as i16;
-	let max_offset = max_offset as i16;
+	let position = position as i32;
+	let selected_client_position = selected_client_position as i32;
+	let total_clients = total_clients as i32;
+	let max_offset = max_offset as i32;
 	let max_offset = min(max_offset, total_clients);
 
 	let mut ret = None;

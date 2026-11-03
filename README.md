@@ -33,7 +33,7 @@ A rust CLI/GUI to switch between windows in [Hyprland](https://github.com/hyprwm
 
 ## Install
 [![Packaging status](https://repology.org/badge/vertical-allrepos/hyprswitch.svg)](https://repology.org/project/hyprswitch/versions)  
-(Hyprland >= 0.55 with Lua API required)  
+(Hyprland >= 0.57 with Lua API required)  
 
 ### From Source
 

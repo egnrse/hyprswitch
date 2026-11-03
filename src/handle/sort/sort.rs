@@ -1,8 +1,9 @@
 use std::collections::{BTreeMap, VecDeque};
 
-use hyprland::shared::{Address, MonitorId, WorkspaceId};
+use hyprland::shared::MonitorId;
 
 use crate::ClientData;
+use crate::{ClientAddress, WorkspaceAddress};
 
 /// Sorts clients with complex sorting
 ///
@@ -10,12 +11,12 @@ use crate::ClientData;
 /// * 'ignore_workspaces' - Don't split clients into workspaces (treat all clients on monitor as one workspace)
 /// * 'ignore_monitors' - Don't split clients into monitors (treat all clients as one monitor)
 pub fn sort_clients(
-	clients: Vec<(Address, ClientData)>,
+	clients: Vec<(ClientAddress, ClientData)>,
 	ignore_workspaces: bool,
 	ignore_monitors: bool,
-) -> Vec<(Address, ClientData)> {
+) -> Vec<(ClientAddress, ClientData)> {
 	// monitor -> workspace -> clients
-	let monitors: Vec<Vec<Vec<(Address, ClientData)>>> = match (ignore_workspaces, ignore_monitors)
+	let monitors: Vec<Vec<Vec<(ClientAddress, ClientData)>>> = match (ignore_workspaces, ignore_monitors)
 	{
 		(true, true) => {
 			panic!(
@@ -26,7 +27,7 @@ pub fn sort_clients(
 		}
 		(true, false) => {
 			// workspace -> clients
-			let mut monitors: BTreeMap<MonitorId, Vec<(Address, ClientData)>> = BTreeMap::new();
+			let mut monitors: BTreeMap<MonitorId, Vec<(ClientAddress, ClientData)>> = BTreeMap::new();
 			for (addr, client) in clients {
 				monitors
 					.entry(client.monitor)
@@ -37,12 +38,12 @@ pub fn sort_clients(
 		}
 		(false, true) => {
 			// monitor -> workspaces
-			let mut workspaces: BTreeMap<MonitorId, Vec<WorkspaceId>> = BTreeMap::new();
+			let mut workspaces: BTreeMap<MonitorId, Vec<WorkspaceAddress>> = BTreeMap::new();
 			for (_, client) in clients.iter() {
 				workspaces
 					.entry(client.monitor)
 					.or_default()
-					.push(client.workspace);
+					.push(client.workspace.clone());
 			}
 			// sort workspaces on monitor (and remove duplicates)
 			for ws in workspaces.values_mut() {
@@ -52,7 +53,7 @@ pub fn sort_clients(
 			}
 
 			// old (real) workspaceId -> new workspaceId
-			let mut workspaces_map: BTreeMap<WorkspaceId, WorkspaceId> = BTreeMap::new();
+			let mut workspaces_map: BTreeMap<WorkspaceAddress, WorkspaceAddress> = BTreeMap::new();
 			loop {
 				let mut current_workspaces = vec![];
 				// get one workspace from each monitor
@@ -64,21 +65,22 @@ pub fn sort_clients(
 				if current_workspaces.is_empty() {
 					break;
 				}
-				let new_workspace_id = current_workspaces[0];
+				let new_workspace_id = current_workspaces[0].clone();
 				// debug!("current_workspaces: {:?}, new_workspace_id: {}", current_workspaces, new_workspace_id);
 				for wss in current_workspaces {
-					workspaces_map.insert(wss, new_workspace_id);
+					workspaces_map.insert(wss, new_workspace_id.clone());
 				}
 			}
 
-			let mut new_workspaces: BTreeMap<WorkspaceId, Vec<(Address, ClientData)>> =
+			let mut new_workspaces: BTreeMap<WorkspaceAddress, Vec<(ClientAddress, ClientData)>> =
 				BTreeMap::new();
 			for (addr, client) in clients {
 				new_workspaces
 					.entry(
-						*workspaces_map
+						workspaces_map
 							.get(&client.workspace)
-							.expect("Workspace for client not found"),
+							.expect("Workspace for client not found")
+							.clone(),
 					)
 					.or_default()
 					.push((addr, client));
@@ -90,13 +92,13 @@ pub fn sort_clients(
 			// monitor -> workspace -> clients
 			let mut monitors: BTreeMap<
 				MonitorId,
-				BTreeMap<WorkspaceId, Vec<(Address, ClientData)>>,
+				BTreeMap<WorkspaceAddress, Vec<(ClientAddress, ClientData)>>,
 			> = BTreeMap::new();
 			for (addr, client) in clients {
 				monitors
 					.entry(client.monitor)
 					.or_default()
-					.entry(client.workspace)
+					.entry(client.workspace.clone())
 					.or_default()
 					.push((addr, client));
 			}
@@ -118,7 +120,7 @@ pub fn sort_clients(
 					a.x.cmp(&b.x)
 				}
 			});
-			let mut queue: VecDeque<(Address, ClientData)> = VecDeque::from(clients);
+			let mut queue: VecDeque<(ClientAddress, ClientData)> = VecDeque::from(clients);
 
 			let mut line_start = queue.pop_front();
 			while let Some((current_addr, current)) = line_start {

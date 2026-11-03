@@ -9,7 +9,7 @@ use gtk4::{
 	FlowBox, Label, Overlay, STYLE_PROVIDER_PRIORITY_APPLICATION, STYLE_PROVIDER_PRIORITY_USER,
 };
 use gtk4_layer_shell::{Edge, LayerShell};
-use hyprland::shared::{Address, MonitorId, WorkspaceId};
+use hyprland::shared::MonitorId;
 use std::collections::HashMap;
 use std::ops::Deref;
 use std::path::PathBuf;
@@ -27,6 +27,7 @@ mod maps;
 mod windows;
 
 use crate::daemon::gui::maps::init_icon_map;
+use crate::{ClientAddress, WorkspaceAddress};
 
 pub(super) fn start_gui_blocking(
 	share: Share,
@@ -252,9 +253,9 @@ pub struct MonitorData {
 	// used to store a ref to the overlay over the whole monitor (parent of monitor index)
 	workspaces_flow_overlay: (Overlay, Option<Label>),
 	// used to store refs to the Overlays over the workspace Frames
-	workspace_refs: HashMap<WorkspaceId, (Overlay, Option<Label>)>,
+	workspace_refs: HashMap<WorkspaceAddress, (Overlay, Option<Label>)>,
 	// used to store refs to the Overlays containing the clients
-	client_refs: HashMap<Address, (Overlay, Option<Label>)>,
+	client_refs: HashMap<ClientAddress, (Overlay, Option<Label>)>,
 }
 
 pub fn start_gui_restarter(share: Share) {

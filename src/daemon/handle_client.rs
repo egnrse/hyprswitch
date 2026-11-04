@@ -1,3 +1,5 @@
+//! handle communication to the client
+
 use crate::client::daemon_running;
 use crate::daemon::handle_fns::{close, init, switch};
 use crate::envs::SYSTEMD_SERVICE;

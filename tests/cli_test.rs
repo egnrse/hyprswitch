@@ -1,5 +1,6 @@
 use std::process::Command;
 
+#[cfg(test)]
 fn get_bin_path() -> std::path::PathBuf {
 	// Cargo sets CARGO_BIN_EXE_<name> during integration testing
 	if let Ok(bin) = std::env::var("CARGO_BIN_EXE_hyprswitch") {

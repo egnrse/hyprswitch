@@ -1,3 +1,5 @@
+//! handle communication as the client
+
 use std::io::{BufRead, BufReader, Write};
 use std::os::unix::net::UnixStream;
 
@@ -32,9 +34,6 @@ pub fn send_open_command() -> anyhow::Result<bool> {
 	send(&serialized).with_context(|| format!("Failed to send open command {serialized:?}"))
 }
 
-///
-/// calls [`crate::daemon::handle_fns::switch`]
-///
 pub fn send_dispatch_command(dispatch_config: DispatchConfig) -> anyhow::Result<bool> {
 	let send_struct = Transfer {
 		transfer: TransferType::Dispatch(dispatch_config),
@@ -46,9 +45,6 @@ pub fn send_dispatch_command(dispatch_config: DispatchConfig) -> anyhow::Result<
 	send(&serialized).with_context(|| format!("Failed to send switch command {serialized:?}"))
 }
 
-///
-/// calls [`crate::daemon::handle_fns::init`]
-///
 pub fn send_init_command(
 	simple_config: SimpleConfig,
 	gui_config: GuiConfig,
@@ -64,9 +60,6 @@ pub fn send_init_command(
 	send(&serialized).with_context(|| format!("Failed to send init command {serialized:?}"))
 }
 
-///
-/// calls [`crate::daemon::handle_fns::close`]
-///
 pub fn send_close_daemon(kill: bool) -> anyhow::Result<bool> {
 	let send_struct = Transfer {
 		transfer: TransferType::Close(kill),
@@ -78,8 +71,8 @@ pub fn send_close_daemon(kill: bool) -> anyhow::Result<bool> {
 	send(&serialized).with_context(|| format!("Failed to send close command {serialized:?}"))
 }
 
+/// check if the communication socket exists and the socket is open
 pub fn daemon_running() -> bool {
-	// check if socket exists and socket is open
 	let buf = get_socket_path_buff();
 	if buf.exists() {
 		debug!("Checking if daemon is running");

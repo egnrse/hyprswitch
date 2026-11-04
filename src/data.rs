@@ -5,7 +5,7 @@ use hyprland::shared::{Address, HyprData, MonitorId};
 
 /* CONST */
 
-/// expect message for address field unwrapping from [[hyprland::data]] data structures
+/// expect message for address field unwrapping from [hyprland::data] data structures
 pub const ADDR_EXPECT: &str = "address should be available on hyprland >=57";
 
 /* STRUCTS */

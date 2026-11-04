@@ -1,15 +1,16 @@
+//! handle input args (using clap)
+
+use clap::{Args, Parser, Subcommand};
+use std::fmt::Debug;
+
+pub use debug::DebugCommand;
+
 mod debug;
 mod dispatch;
 mod gui;
 mod init;
 mod shared;
 mod simple;
-
-use std::fmt::Debug;
-
-use clap::{Args, Parser, Subcommand};
-
-pub use debug::DebugCommand;
 
 #[derive(Parser, Debug, Clone)]
 #[command(

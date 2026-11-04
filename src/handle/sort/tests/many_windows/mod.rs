@@ -1,9 +1,8 @@
-use std::time::Instant;
-
 use crate::handle::sort::tests::{
 	client_vec, create_svg_from_client_tests, function, is_sorted, monitor_map, workspace_map,
 };
 use crate::handle::sort::{sort_clients, update_clients};
+use std::time::Instant;
 
 /// ```text
 ///       1       3    5   6     8   10  11  12

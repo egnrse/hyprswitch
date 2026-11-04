@@ -1,3 +1,7 @@
+//! the gtk4 gui
+
+use crate::daemon::gui::maps::init_icon_map;
+use crate::{ClientAddress, WorkspaceAddress};
 use crate::{GUISend, InitConfig, Payload, Share, UpdateCause, Warn};
 use anyhow::Context;
 use async_channel::{Receiver, RecvError, Sender};
@@ -25,9 +29,6 @@ mod gui_handle;
 mod icon;
 mod maps;
 mod windows;
-
-use crate::daemon::gui::maps::init_icon_map;
-use crate::{ClientAddress, WorkspaceAddress};
 
 pub(super) fn start_gui_blocking(
 	share: Share,

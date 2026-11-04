@@ -14,6 +14,7 @@ use tracing_subscriber::EnvFilter;
 
 mod cli;
 
+/// entry point when running the cli
 fn main() -> anyhow::Result<()> {
 	let cli = cli::App::try_parse()
         .unwrap_or_else(|e| {

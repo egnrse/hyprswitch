@@ -45,4 +45,3 @@ opt-level = "s"
 
 [features]
 default = []
-config = ["ron"]

@@ -4,8 +4,8 @@ use hyprland::prelude::HyprDataActive;
 use hyprland::shared::MonitorId;
 use tracing::{debug, span, warn, Level};
 
+use crate::{get_ws, ADDR_EXPECT};
 use crate::{global, Active, FindByFirst, HyprlandData};
-use crate::{ADDR_EXPECT, get_ws};
 use crate::{ClientAddress, WorkspaceAddress};
 
 pub fn switch_to_active(
@@ -39,13 +39,12 @@ pub fn switch_to_active(
 				.workspaces
 				.find_by_first(wid)
 				.context("Workspace data not found")?;
-			switch_workspace(
-				&workspace_data.ws,
-				*global::DRY.get().expect("DRY not set"),
-			)
-			.with_context(|| {
-				format!("Failed to execute switch workspace with workspace_data {workspace_data:?}")
-			})?;
+			switch_workspace(&workspace_data.ws, *global::DRY.get().expect("DRY not set"))
+				.with_context(|| {
+					format!(
+						"Failed to execute switch workspace with workspace_data {workspace_data:?}"
+					)
+				})?;
 		}
 		Some(Active::Monitor(mid)) => {
 			switch_monitor(mid, *global::DRY.get().expect("DRY not set")).with_context(|| {
@@ -82,7 +81,10 @@ fn switch_workspace(next_workspace: &Workspace, dry_run: bool) -> anyhow::Result
 	let current_workspace = Workspace::get_active();
 	if let Ok(workspace) = current_workspace {
 		if next_workspace.address == workspace.address {
-			debug!("Already on workspace {}", next_workspace.address.as_ref().expect(ADDR_EXPECT));
+			debug!(
+				"Already on workspace {}",
+				next_workspace.address.as_ref().expect(ADDR_EXPECT)
+			);
 			return Ok(());
 		}
 	}
@@ -95,7 +97,11 @@ fn switch_workspace(next_workspace: &Workspace, dry_run: bool) -> anyhow::Result
 			)
 		})?;
 	} else {
-		switch_normal_workspace(next_workspace.address.clone().expect(ADDR_EXPECT).into(), dry_run).with_context(|| {
+		switch_normal_workspace(
+			next_workspace.address.clone().expect(ADDR_EXPECT).into(),
+			dry_run,
+		)
+		.with_context(|| {
 			format!(
 				"Failed to execute switch workspace with address {}",
 				next_workspace.address.as_ref().expect(ADDR_EXPECT)

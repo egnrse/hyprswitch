@@ -2,8 +2,8 @@ use anyhow::Context;
 use hyprland::shared::MonitorId;
 use tracing::{trace, warn};
 
-use crate::{ClientData, DispatchConfig, MonitorData, WorkspaceData};
 use crate::{ClientAddress, WorkspaceAddress};
+use crate::{ClientData, DispatchConfig, MonitorData, WorkspaceData};
 
 pub(crate) fn find_next_monitor<'a>(
 	dispatch_config: &DispatchConfig,

@@ -3,13 +3,10 @@
 use hyprland::data::{Workspace, WorkspaceBasic, Workspaces};
 use hyprland::shared::{Address, HyprData, MonitorId};
 
-
 /* CONST */
 
 /// expect message for address field unwrapping from [[hyprland::data]] data structures
 pub const ADDR_EXPECT: &str = "address should be available on hyprland >=57";
-
-
 
 /* STRUCTS */
 
@@ -90,8 +87,6 @@ pub struct HyprlandData {
 	pub monitors: Vec<(MonitorId, MonitorData)>,
 }
 
-
-
 /* FUNCTIONS */
 
 /// return the first item of Data which has ID
@@ -113,7 +108,6 @@ impl FindByFirst<MonitorId, MonitorData> for Vec<(MonitorId, MonitorData)> {
 		self.iter().find(|(mid, _)| *mid == *id).map(|(_, md)| md)
 	}
 }
-
 
 /// get the equivalent [hyprland::data::Workspace] from a [hyprland::data::WorkspaceBasic]
 pub fn get_ws(w: &WorkspaceBasic) -> Option<Workspace> {

@@ -10,16 +10,13 @@ pub use data::collect_data;
 pub use exec::switch_to_active;
 
 use crate::handle::next::{find_next_client, find_next_monitor, find_next_workspace};
+use crate::ClientAddress;
 use crate::{Active, DispatchConfig, HyprlandData, SwitchType};
-use crate::{ClientAddress};
 
 mod data;
 mod exec;
 mod next;
-mod run;
 mod sort;
-
-pub use run::run_program;
 
 pub fn find_next(
 	switch_type: &SwitchType,

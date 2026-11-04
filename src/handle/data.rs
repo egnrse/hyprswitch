@@ -1,9 +1,9 @@
 use crate::handle::get_recent_clients_map;
 use crate::handle::sort::{sort_clients, update_clients};
+use crate::ADDR_EXPECT;
 use crate::{Active, ClientData, HyprlandData, MonitorData, SwitchType, WorkspaceData};
-use crate::{FindByFirst, SimpleConfig};
-use crate::{ADDR_EXPECT};
 use crate::{ClientAddress, WorkspaceAddress};
+use crate::{FindByFirst, SimpleConfig};
 use hyprland::data::{Client, Clients, Monitors, Workspaces};
 use hyprland::prelude::{HyprData, HyprDataActiveOptional};
 use hyprland::shared::MonitorId;
@@ -87,7 +87,10 @@ pub fn collect_data(config: SimpleConfig) -> anyhow::Result<(HyprlandData, Optio
 		let mut cd: Vec<(ClientAddress, ClientData)> = Vec::with_capacity(clients.len());
 
 		for client in clients {
-			if workspace_data.find_by_first(&client.workspace.address.clone().expect(ADDR_EXPECT).into()).is_some() {
+			if workspace_data
+				.find_by_first(&client.workspace.address.clone().expect(ADDR_EXPECT).into())
+				.is_some()
+			{
 				cd.push((
 					client.address.clone().into(),
 					ClientData {
@@ -163,17 +166,18 @@ pub fn collect_data(config: SimpleConfig) -> anyhow::Result<(HyprlandData, Optio
 	monitor_data.sort_by_key(|a| a.0);
 
 	let active = Client::get_active()?;
-	let active: Option<(String, WorkspaceAddress, MonitorId, ClientAddress)> = active.as_ref().map_or_else(
-		|| None,
-		|a| {
-			Some((
-				a.class.clone(),
-				a.workspace.address.clone().expect(ADDR_EXPECT).into(),
-				a.monitor.unwrap_or(-1),
-				a.address.clone().into(),
-			))
-		},
-	);
+	let active: Option<(String, WorkspaceAddress, MonitorId, ClientAddress)> =
+		active.as_ref().map_or_else(
+			|| None,
+			|a| {
+				Some((
+					a.class.clone(),
+					a.workspace.address.clone().expect(ADDR_EXPECT).into(),
+					a.monitor.unwrap_or(-1),
+					a.address.clone().into(),
+				))
+			},
+		);
 
 	trace!("active: {:?}", active);
 

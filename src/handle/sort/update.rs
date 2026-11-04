@@ -1,8 +1,8 @@
 use hyprland::shared::MonitorId;
 use tracing::error;
 
-use crate::{ClientData, FindByFirst, MonitorData, WorkspaceData};
 use crate::{ClientAddress, WorkspaceAddress};
+use crate::{ClientData, FindByFirst, MonitorData, WorkspaceData};
 
 /// updates clients with workspace and monitor data
 /// * 'clients' - Vector of clients to update

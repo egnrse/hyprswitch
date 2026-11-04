@@ -1,0 +1,7 @@
+# /etc/default/hyprswitch
+# 
+# If you want to edit it, copy it to ~/.config/hyprswitch/args.env
+# Will be launched like: /usr/bin/hyprswitch $HYPRSWITCH_OPTIONS init $HYPRSWITCH_ARGS
+HYPRSWITCH_OPTIONS=""
+HYPRSWITCH_ARGS="--show-title --size-factor 5.5 --workspaces-per-row 4"
+

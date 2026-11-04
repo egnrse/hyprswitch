@@ -1,12 +1,13 @@
+//! do the actual switching using `hyprctl`
+
+use crate::{get_ws, ADDR_EXPECT};
+use crate::{global, Active, FindByFirst, HyprlandData};
+use crate::{ClientAddress, WorkspaceAddress};
 use anyhow::Context;
 use hyprland::data::Workspace;
 use hyprland::prelude::HyprDataActive;
 use hyprland::shared::MonitorId;
 use tracing::{debug, span, warn, Level};
-
-use crate::{get_ws, ADDR_EXPECT};
-use crate::{global, Active, FindByFirst, HyprlandData};
-use crate::{ClientAddress, WorkspaceAddress};
 
 pub fn switch_to_active(
 	active: Option<&Active>,

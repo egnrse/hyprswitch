@@ -1,17 +1,20 @@
-use std::sync::{Arc, Mutex};
+//! background daemon and GUI management
 
+use crate::envs::SYSTEMD_SERVICE;
 use crate::{InitConfig, Payload, Share, SharedData};
 use gtk4::glib::clone;
+use std::sync::{Arc, Mutex};
 use tracing::{debug, span, Level};
 
+pub use submap::deactivate_submap;
+
 pub mod gui;
+
 mod handle_client;
 mod handle_fns;
 mod submap;
 
-use crate::envs::SYSTEMD_SERVICE;
-pub use submap::deactivate_submap;
-
+/// initialize the daemon process
 pub fn start_daemon(init_config: InitConfig) -> anyhow::Result<()> {
 	// we don't have any config here, so we just create a default one with no filtering (but fill the monitors as they are needed for gtk)
 	// create arc to send to threads containing the config the daemon was initialized with and the data (clients, etc.)

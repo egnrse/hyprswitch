@@ -1,3 +1,5 @@
+//! Switch between windows/workspaces/monitors on [hyprland](https://hypr.land/).
+
 #![deny(clippy::print_stdout)]
 
 use anyhow::Context;
@@ -14,27 +16,32 @@ use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 use tracing::{info, trace, warn};
 
-pub mod client;
-mod configs;
-pub mod daemon;
-mod data;
-pub mod envs;
-pub mod handle;
-
 pub use configs::*;
 pub use data::*;
 
-// changed id to address
+pub mod client;
+pub mod daemon;
+pub mod envs;
+pub mod handle;
+
+mod configs;
+mod data;
+
+/// minimum hyprland version which is supported
+///
+/// reason: changed id field to address for eg. clients
 const MIN_VERSION: Version = Version::new(0, 57, 0);
 
+/// global variables
 pub mod global {
-	/// global variable to store if we are in dry mode
+	/// store if we are in dry mode
 	pub static DRY: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
 
-	/// global variable to store if gui is open
+	/// store if the gui is open
 	pub static OPEN: std::sync::OnceLock<std::sync::Mutex<bool>> = std::sync::OnceLock::new();
 }
 
+/// between what to switch
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum SwitchType {
 	Client,
@@ -42,9 +49,11 @@ pub enum SwitchType {
 	Monitor,
 }
 
+/// when to close the gui
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum CloseType {
 	Default,
+	/// on release of the modifier key
 	ModKeyRelease,
 }
 
@@ -56,15 +65,15 @@ pub enum ReverseKey {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum TransferType {
-	// switch to next/prev workspace/monitor/client
+	/// switch to next/prev workspace/monitor/client
 	Dispatch(DispatchConfig),
-	// init with config, gui_config and submap
+	/// init with config, gui_config and submap
 	Init(SimpleConfig, GuiConfig, SubmapConfig),
-	// close command with kill
+	/// close command with kill
 	Close(bool),
-	// check if versions match (always succeeds)
+	/// check if versions match (always succeeds)
 	VersionCheck,
-	// check if the daemon is active (gui is open)
+	/// check if the daemon is active (gui is open)
 	Open,
 }
 
@@ -97,6 +106,7 @@ pub struct SharedData {
 	pub hypr_data: HyprlandData,
 }
 
+/// modifier keys
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum ModKey {
 	AltL,
@@ -112,15 +122,15 @@ pub enum ModKey {
 impl Display for ModKey {
 	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
 		match self {
-			// need snake_case
-			ModKey::SuperL => write!(f, "super_l"),
-			ModKey::SuperR => write!(f, "super_r"),
-			ModKey::AltL => write!(f, "alt_l"),
-			ModKey::AltR => write!(f, "alt_r"),
-			ModKey::CtrlL => write!(f, "ctrl_l"),
-			ModKey::CtrlR => write!(f, "ctrl_r"),
-			ModKey::ShiftL => write!(f, "shift_l"),
-			ModKey::ShiftR => write!(f, "shift_r"),
+			// need SCREAMING_SNAKE_CASE
+			ModKey::SuperL => write!(f, "SUPER_L"),
+			ModKey::SuperR => write!(f, "SUPER_R"),
+			ModKey::AltL => write!(f, "ALT_L"),
+			ModKey::AltR => write!(f, "ALT_R"),
+			ModKey::CtrlL => write!(f, "CTRL_L"),
+			ModKey::CtrlR => write!(f, "CTRL_R"),
+			ModKey::ShiftL => write!(f, "SHIFT_L"),
+			ModKey::ShiftR => write!(f, "SHIFT_R"),
 		}
 	}
 }
@@ -161,6 +171,7 @@ pub type Share = Arc<(
 	Receiver<Option<Payload>>,
 )>;
 
+/// get the path to the socket for communication between the daemon and a client
 pub fn get_socket_path_buff() -> PathBuf {
 	let mut buf = if let Ok(runtime_path) = var("XDG_RUNTIME_DIR") {
 		PathBuf::from(runtime_path)
@@ -203,6 +214,9 @@ impl<A, E: Display> Warn<A> for Result<A, E> {
 	}
 }
 
+/// send a notification
+///
+/// can be disabled with the env option `DISABLE_TOASTS`
 pub fn toast(_body: &str) {
 	if !*envs::DISABLE_TOASTS {
 		#[cfg(not(debug_assertions))]
@@ -219,6 +233,7 @@ pub fn toast(_body: &str) {
 	}
 }
 
+/// check running hyprland version
 pub fn check_version() -> anyhow::Result<()> {
 	let version = HyprlandVersion::get()
 		.context("Failed to get version! (Hyprland is probably outdated or too new??)")?;

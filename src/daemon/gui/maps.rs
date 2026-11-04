@@ -39,7 +39,7 @@ pub fn init_icon_map() {
 	}
 }
 
-/// https://github.com/H3rmt/hyprswitch/discussions/137
+/// <https://github.com/H3rmt/hyprswitch/discussions/137>
 pub fn icon_has_name(name: &str) -> bool {
 	let map = get_icon_map().lock().expect("Failed to lock icon map");
 	map.contains(&Box::from(name))

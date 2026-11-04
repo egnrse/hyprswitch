@@ -6,11 +6,11 @@ Some notes for myself and contributors.
 cargo build --all-targets --all-features
 cargo test --all-features -- --include-ignored
 cargo clippy --all-targets --all-features
-cargo fmt --check
+cargo fmt --all --check
 
 # try stuff
 cargo run -- init --show-title --size-factor 6 --workspaces-per-row 5
-cargo run -- gui --mod-key super --key w 
+cargo run -- gui --mod-key SUPER --key w 
 ```
 
 Tests that need a running hyprland instance have `ignore`.
@@ -19,10 +19,10 @@ Tests that need a running hyprland instance have `ignore`.
 ## Structure
 ```
 src/          source tree
-├─ cli/       cli stuff (parsing/subcommands)
+├─ cli/       handle input args (using clap)
+├─ client/    handle communication as the client
 ├─ daemon/    background daemon and GUI management
-└─ handle/    event handling, switching logic
-config/       example/default config
+└─ handle/    event handling and switching logic
 imgs/         visuals for docs and README
 systemd/      experimental systemd support
 tests/        some tests

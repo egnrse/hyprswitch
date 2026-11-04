@@ -1,5 +1,9 @@
+//! test cli failure
+//! options that need a running hyprland compositor have the flag 'ignore'
+
 use std::process::Command;
 
+#[cfg(test)]
 fn get_bin_path() -> std::path::PathBuf {
 	// Cargo sets CARGO_BIN_EXE_<name> during integration testing
 	if let Ok(bin) = std::env::var("CARGO_BIN_EXE_hyprswitch") {

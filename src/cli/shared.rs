@@ -62,7 +62,7 @@ pub enum InputModKey {
 	Alt,
 	AltL,
 	AltR,
-	// = ctrl_;
+	// = ctrl_l
 	Ctrl,
 	CtrlL,
 	CtrlR,

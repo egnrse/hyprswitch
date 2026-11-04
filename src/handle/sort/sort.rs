@@ -1,9 +1,7 @@
-use std::collections::{BTreeMap, VecDeque};
-
-use hyprland::shared::MonitorId;
-
 use crate::ClientData;
 use crate::{ClientAddress, WorkspaceAddress};
+use hyprland::shared::MonitorId;
+use std::collections::{BTreeMap, VecDeque};
 
 /// Sorts clients with complex sorting
 ///

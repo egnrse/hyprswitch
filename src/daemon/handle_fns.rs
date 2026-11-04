@@ -1,3 +1,5 @@
+//! handle the switching
+
 use crate::configs::DispatchConfig;
 use crate::daemon::gui::reload_desktop_maps;
 use crate::daemon::submap::{activate_submap, deactivate_submap, generate_submap};
@@ -7,6 +9,7 @@ use anyhow::Context;
 use std::ops::Deref;
 use tracing::{info, trace};
 
+/// move the selection to the next item and refresh the GUI
 pub(crate) fn switch(
 	share: &Share,
 	dispatch_config: &DispatchConfig,
@@ -36,6 +39,7 @@ pub(crate) fn switch(
 	Ok(())
 }
 
+/// open the switcher GUI
 pub(crate) fn init(
 	share: &Share,
 	simple_config: SimpleConfig,
@@ -91,6 +95,7 @@ pub(crate) fn init(
 	Ok(())
 }
 
+/// close the GUI and focus the selected window (unless `kill` is set)
 pub(crate) fn close(share: &Share, kill: bool, client_id: u8) -> anyhow::Result<()> {
 	let (latest, send, receive) = share.deref();
 	deactivate_submap();

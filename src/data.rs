@@ -1,20 +1,20 @@
-//! custom constants, data structures and helper functions
+//! custom constants, data structures, traits and helper functions
 
 use hyprland::data::{Workspace, WorkspaceBasic, Workspaces};
 use hyprland::shared::{Address, HyprData, MonitorId};
 
 /* CONST */
 
-/// expect message for address field unwrapping from [[hyprland::data]] data structures
-pub const ADDR_EXPECT: &str = "address should be available on hyprland >=57";
+/// panic message for `.expect()` on the [`Address`] field of [`hyprland::data`] structures
+pub const ADDR_EXPECT: &str = "address should be available on hyprland >=0.57";
 
 /* STRUCTS */
 
-/// wrapper for the [hyprland::shared::Address] when used for Workspaces
+/// wrapper for [`Address`] when used for Workspaces
 /// > **Warning (unstable):** I am trying to upstream this datatype to [`hyprland`]
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct WorkspaceAddress(pub Address);
-/// wrapper for the [hyprland::shared::Address] when used for Clients
+/// wrapper for [`Address`] when used for Clients
 /// > **Warning (unstable):** I am trying to upstream this datatype to [`hyprland`]
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct ClientAddress(pub Address);
@@ -39,6 +39,7 @@ impl std::fmt::Display for ClientAddress {
 	}
 }
 
+/// internal represenation of a [hyprland::data::Monitor]
 #[derive(Debug, Clone)]
 pub struct MonitorData {
 	pub x: i32,
@@ -49,6 +50,7 @@ pub struct MonitorData {
 	pub enabled: bool,
 }
 
+/// internal represenation of a [`Workspace`]
 #[derive(Debug, Clone)]
 pub struct WorkspaceData {
 	pub name: String,
@@ -62,6 +64,7 @@ pub struct WorkspaceData {
 	pub ws: Workspace,
 }
 
+/// internal represenation of a [hyprland::data::Client]
 #[derive(Debug, Clone)]
 pub struct ClientData {
 	pub x: i32,
@@ -80,6 +83,7 @@ pub struct ClientData {
 	pub ws: WorkspaceBasic,
 }
 
+/// a data struct that holds all data we need from hyprland
 #[derive(Debug, Default)]
 pub struct HyprlandData {
 	pub clients: Vec<(ClientAddress, ClientData)>,
@@ -87,9 +91,9 @@ pub struct HyprlandData {
 	pub monitors: Vec<(MonitorId, MonitorData)>,
 }
 
-/* FUNCTIONS */
+/* TRAITS */
 
-/// return the first item of Data which has ID
+/// lookup of a value in a collection of `(ID, Data)` pairs by its key
 pub trait FindByFirst<ID, Data> {
 	fn find_by_first(&self, id: &ID) -> Option<&Data>;
 }
@@ -109,7 +113,9 @@ impl FindByFirst<MonitorId, MonitorData> for Vec<(MonitorId, MonitorData)> {
 	}
 }
 
-/// get the equivalent [hyprland::data::Workspace] from a [hyprland::data::WorkspaceBasic]
+/* FUNCTIONS */
+
+/// returns the equivalent [`Workspace`] to a [`WorkspaceBasic`] object
 pub fn get_ws(w: &WorkspaceBasic) -> Option<Workspace> {
 	let workspaces = Workspaces::get().ok()?;
 	workspaces

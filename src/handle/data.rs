@@ -1,3 +1,5 @@
+//! collect data from hyprland
+
 use crate::handle::get_recent_clients_map;
 use crate::handle::sort::{sort_clients, update_clients};
 use crate::ADDR_EXPECT;

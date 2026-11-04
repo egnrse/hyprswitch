@@ -1,3 +1,5 @@
+//! custom config data structures
+
 use crate::{CloseType, ModKey, ReverseKey, SwitchType};
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
@@ -9,6 +11,7 @@ pub struct DispatchConfig {
 	pub offset: u8,
 }
 
+/// store options for the `simple` subcommand
 #[derive(Debug, Clone, SmartDefault, Serialize, Deserialize)]
 pub struct SimpleConfig {
 	pub ignore_monitors: bool,
@@ -22,6 +25,7 @@ pub struct SimpleConfig {
 	pub switch_type: SwitchType,
 }
 
+/// store options for the `init` subcommand
 #[derive(Debug, Clone, Default)]
 pub struct InitConfig {
 	pub custom_css: Option<PathBuf>,
@@ -46,6 +50,7 @@ pub enum SubmapConfig {
 	},
 }
 
+/// store options for the `gui` subcommand
 #[derive(Debug, Clone, SmartDefault, Serialize, Deserialize)]
 pub struct GuiConfig {
 	pub max_switch_offset: u8,

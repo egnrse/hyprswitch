@@ -1,17 +1,19 @@
-use std::collections::HashMap;
-use std::sync::{Mutex, OnceLock};
-
-use anyhow::Context;
-use hyprland::data::{Client, Monitor, Monitors};
-use hyprland::prelude::{HyprData, HyprDataActiveOptional, HyprDataVec};
-use tracing::info;
-
-pub use data::collect_data;
-pub use exec::switch_to_active;
+//! event handling and switching logic
+//!
+//! handles most interactions with hyprland
 
 use crate::handle::next::{find_next_client, find_next_monitor, find_next_workspace};
 use crate::ClientAddress;
 use crate::{Active, DispatchConfig, HyprlandData, SwitchType};
+use anyhow::Context;
+use hyprland::data::{Client, Monitor, Monitors};
+use hyprland::prelude::{HyprData, HyprDataActiveOptional, HyprDataVec};
+use std::collections::HashMap;
+use std::sync::{Mutex, OnceLock};
+use tracing::info;
+
+pub use data::collect_data;
+pub use exec::switch_to_active;
 
 mod data;
 mod exec;

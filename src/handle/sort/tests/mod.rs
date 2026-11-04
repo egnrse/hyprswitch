@@ -1,13 +1,12 @@
 //! helper functions for sorting tests
 #![allow(clippy::print_stdout)]
 
+use crate::ClientAddress;
+use crate::{ClientData, MonitorData};
 use hyprland::data::{Workspace, WorkspaceBasic};
 use hyprland::shared::MonitorId;
 use random_color::RandomColor;
 use svg::node::element::{Group, Rectangle, Text, SVG};
-
-use crate::ClientAddress;
-use crate::{ClientData, MonitorData};
 
 mod many_windows;
 mod multi_workspace_multi_monitor_horizontal;

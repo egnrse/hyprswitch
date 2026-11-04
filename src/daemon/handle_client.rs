@@ -1,3 +1,5 @@
+//! handle communication to the client
+
 use crate::client::daemon_running;
 use crate::daemon::handle_fns::{close, init, switch};
 use crate::envs::SYSTEMD_SERVICE;
@@ -206,6 +208,7 @@ fn return_success(success: bool, stream: &mut UnixStream) -> anyhow::Result<()> 
 	Ok(())
 }
 
+/// message when daemon and client version are out of sync
 const VERSION_OUT_OF_SYNC: &str = r"
 This is most likely caused by updating hyprswitch and not restarting the hyprswitch daemon.
 You must manually start the new version (run `pkill hyprswitch && hyprswitch init &` in a terminal)

@@ -6,6 +6,7 @@ use tracing::{debug, span, trace, Level};
 
 use crate::{CloseType, ModKey, ReverseKey, Warn};
 
+/// activate the given submap using `hyprctl`
 pub(super) fn activate_submap(submap_name: &str) -> anyhow::Result<()> {
 	let _span = span!(Level::TRACE, "submap").entered();
 	let script = format!("hl.dispatch(hl.dsp.submap('{}'))", submap_name);
@@ -26,6 +27,9 @@ fn generate_submap_name() -> String {
 	format!("hyprswitch-{}", rand::random::<u16>())
 }
 
+/// generate a submap and eval it using `hyprctl`
+///
+/// > in debug mode: adds `ctr+o` which aborts the submap and kills hyprswitch
 pub(super) fn generate_submap(
 	mod_key: ModKey,
 	key: String,
@@ -245,6 +249,7 @@ pub(super) fn generate_submap(
 	Ok(())
 }
 
+/// reset all submaps using `hyprctl`
 pub fn deactivate_submap() {
 	let _span = span!(Level::TRACE, "submap").entered();
 	Command::new("hyprctl")
@@ -257,7 +262,8 @@ pub fn deactivate_submap() {
 	debug!("Deactivated submap");
 }
 
-fn get_mod_from_mod_key(mod_key: ModKey) -> &'static str {
+/// convert a [`ModKey`] instance to a string for `hyprctl`
+const fn get_mod_from_mod_key(mod_key: ModKey) -> &'static str {
 	match mod_key {
 		ModKey::SuperL | ModKey::SuperR => "SUPER",
 		ModKey::AltL | ModKey::AltR => "ALT",

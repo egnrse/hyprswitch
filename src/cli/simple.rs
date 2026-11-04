@@ -36,7 +36,7 @@ pub struct SimpleConf {
     )]
 	pub sort_recent: bool,
 
-	/// Switches to next / previous workspace / client / monitor
+	/// Switch between workspaces, clients or monitors
 	#[arg(long, default_value_t, value_enum)]
 	pub switch_type: shared::InputSwitchType,
 }

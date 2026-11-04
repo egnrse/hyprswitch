@@ -17,6 +17,7 @@ A rust CLI/GUI to switch between windows in [Hyprland](https://github.com/hyprwm
 - sort windows by their position on the screen
 - customize looks with CSS
 - customize keybindings
+- systemd integration
 
 ![image.png](imgs/image_4.png)
 

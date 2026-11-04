@@ -19,12 +19,12 @@ Tests that need a running hyprland instance have `ignore`.
 ## Structure
 ```
 src/          source tree
+├─ assets/    asset files (eg. systemd-service)
 ├─ cli/       handle input args (using clap)
 ├─ client/    handle communication as the client
 ├─ daemon/    background daemon and GUI management
 └─ handle/    event handling and switching logic
 imgs/         visuals for docs and README
-systemd/      experimental systemd support
 tests/        some tests
 ```
 

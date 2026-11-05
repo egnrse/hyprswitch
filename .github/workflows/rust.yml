@@ -39,7 +39,7 @@ jobs:
         with:
           prefix-key: rust-build
       - name: Build
-        run: cargo build --release --all-features
+        run: cargo build --locked --release --all-features
       - name: Test
         run: cargo test --all-features
 

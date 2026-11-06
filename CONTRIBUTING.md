@@ -34,6 +34,9 @@ tests/        some tests
 cargo doc --all-features --open	# open documentation
 ```
 
+`CTR + o`: abort and close the daemon (disables the submap)
+
+
 ### Update Dependecies
 ```sh
 cargo clean

@@ -198,13 +198,24 @@ pub(super) fn generate_submap(
 			}
 		}
 
+		// abort and kill hyprswitch
+		#[cfg(debug_assertions)]
+		const DEBUG_ABORT_MOD: &str = get_mod_from_mod_key(ModKey::AltR);
+		#[cfg(debug_assertions)]
+		const DEBUG_ABORT_KEY: &str = "o";
+
 		#[cfg(debug_assertions)]
 		bind(
-			get_mod_from_mod_key(ModKey::AltR),
-			"o",
-			"kill $(pidof hyprswitch) && hyprctl dispatch submap reset",
+			DEBUG_ABORT_MOD,
+			DEBUG_ABORT_KEY,
+			"kill $(pidof hyprswitch)",
 			false,
 		);
+		#[cfg(debug_assertions)]
+		lua_binds.push(format!(
+			"hl.bind('{} + {}', hl.dsp.submap('reset'))",
+			DEBUG_ABORT_MOD, DEBUG_ABORT_KEY,
+		));
 
 		let name = generate_submap_name();
 
@@ -257,7 +268,7 @@ pub fn deactivate_submap() {
 	debug!("Deactivated submap");
 }
 
-fn get_mod_from_mod_key(mod_key: ModKey) -> &'static str {
+const fn get_mod_from_mod_key(mod_key: ModKey) -> &'static str {
 	match mod_key {
 		ModKey::SuperL | ModKey::SuperR => "SUPER",
 		ModKey::AltL | ModKey::AltR => "ALT",

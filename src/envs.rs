@@ -26,14 +26,33 @@ lazy_static! {
 	pub static ref DISABLE_TOASTS: bool = env::var("DISABLE_TOASTS")
 		.map(|s| s.parse().expect("Failed to parse DISABLE_TOASTS"))
 		.unwrap_or(false);
+	/// socket name for client/daemon communication
+	/// - does not change the path, just the filename
+	/// - needs to be the same for the client/daemon
+	///
+	/// (default: `hyprswitch.sock` / default-debug: `hyprswitch.debug.sock`)
+	pub static ref SOCKET_NAME: String = {
+		let custom = env::var("SOCKET_NAME").unwrap_or_default();
+		if !custom.is_empty() {
+			custom.to_string()
+		} else if cfg!(debug_assertions) {
+			"hyprswitch.debug.sock".to_string()
+		} else {
+			"hyprswitch.sock".to_string()
+		}
+	};
 }
 
 /// print the currently active enironment variables to debug
 pub fn envvar_dump() {
 	debug!(
 		"ENV dump: \
-    LOG_MODULE_PATH: {:?}, REMOVE_HTML_FROM_WORKSPACE_NAME: {:?}, DISABLE_TOASTS: {:?}, \
-    SYSTEMD_SERVICE: {:?}",
-		*LOG_MODULE_PATH, *REMOVE_HTML_FROM_WORKSPACE_NAME, *DISABLE_TOASTS, *SYSTEMD_SERVICE
+		LOG_MODULE_PATH: {:?}, REMOVE_HTML_FROM_WORKSPACE_NAME: {:?}, DISABLE_TOASTS: {:?}, \
+		SYSTEMD_SERVICE: {:?}, SOCKET_NAME: {:?}",
+		*LOG_MODULE_PATH,
+		*REMOVE_HTML_FROM_WORKSPACE_NAME,
+		*DISABLE_TOASTS,
+		*SYSTEMD_SERVICE,
+		*SOCKET_NAME,
 	);
 }

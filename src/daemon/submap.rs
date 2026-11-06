@@ -1,10 +1,11 @@
+//! create and manage the key bindings submap for the gui
+
+use crate::envs::SOCKET_NAME;
+use crate::{CloseType, ModKey, ReverseKey, Warn};
+use anyhow::Context;
 use std::env;
 use std::process::Command;
-
-use anyhow::Context;
 use tracing::{debug, span, trace, Level};
-
-use crate::{CloseType, ModKey, ReverseKey, Warn};
 
 pub(super) fn activate_submap(submap_name: &str) -> anyhow::Result<()> {
 	let _span = span!(Level::TRACE, "submap").entered();
@@ -55,9 +56,12 @@ pub(super) fn generate_submap(
 			} else {
 				format!("{} + {}", mods, k)
 			};
+			// environment variables set before the executable
+			let env_vars = format!("SOCKET_NAME={}", *SOCKET_NAME);
+
 			lua_binds.push(format!(
-				"hl.bind('{}', hl.dsp.exec_cmd('{}'){})",
-				keys, cmd, opts
+				"hl.bind('{}', hl.dsp.exec_cmd('{} {}'){})",
+				keys, env_vars, cmd, opts
 			));
 		};
 

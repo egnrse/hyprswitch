@@ -109,3 +109,179 @@ pub fn get_active_monitor() -> Option<String> {
 		_ => None,
 	}
 }
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	use crate::handle::sort::tests::{client_vec, monitor_map, workspace_map};
+
+	fn dispatch(reverse: bool, offset: u8) -> DispatchConfig {
+		DispatchConfig { reverse, offset }
+	}
+
+	/// 3 clients, 3 workspaces and 2 monitors
+	fn hypr_data() -> HyprlandData {
+		HyprlandData {
+			clients: client_vec![(0, 0, 1, 1, 0, 0), (1, 0, 1, 1, 0, 0), (2, 0, 1, 1, 0, 1)],
+			workspaces: workspace_map![(0, 0, 0), (1, 0, 0), (2, 0, 1)],
+			monitors: monitor_map![(0, 0, 1, 1), (1, 1, 1, 1)],
+		}
+	}
+
+	#[test]
+	fn client_switch_without_active_selects_the_first_client() {
+		let data = hypr_data();
+		let next = find_next(&SwitchType::Client, &dispatch(false, 1), &data, None).unwrap();
+		assert!(matches!(next, Active::Client(addr) if addr == data.clients[0].0));
+	}
+
+	#[test]
+	fn client_switch_continues_after_the_active_client() {
+		let data = hypr_data();
+		let active = Active::Client(data.clients[1].0.clone());
+		let next = find_next(
+			&SwitchType::Client,
+			&dispatch(false, 1),
+			&data,
+			Some(&active),
+		)
+		.unwrap();
+		assert!(matches!(next, Active::Client(addr) if addr == data.clients[2].0));
+	}
+
+	#[test]
+	fn client_switch_reverse_goes_to_the_previous_client() {
+		let data = hypr_data();
+		let active = Active::Client(data.clients[1].0.clone());
+		let next = find_next(
+			&SwitchType::Client,
+			&dispatch(true, 1),
+			&data,
+			Some(&active),
+		)
+		.unwrap();
+		assert!(matches!(next, Active::Client(addr) if addr == data.clients[0].0));
+	}
+
+	#[test]
+	fn workspace_switch_continues_after_the_active_workspace() {
+		let data = hypr_data();
+		let active = Active::Workspace(data.workspaces[0].0.clone());
+		let next = find_next(
+			&SwitchType::Workspace,
+			&dispatch(false, 1),
+			&data,
+			Some(&active),
+		)
+		.unwrap();
+		assert!(matches!(next, Active::Workspace(ws) if ws == data.workspaces[1].0));
+	}
+
+	#[test]
+	fn workspace_switch_wraps_around() {
+		let data = hypr_data();
+		let active = Active::Workspace(data.workspaces[2].0.clone());
+		let next = find_next(
+			&SwitchType::Workspace,
+			&dispatch(false, 1),
+			&data,
+			Some(&active),
+		)
+		.unwrap();
+		assert!(matches!(next, Active::Workspace(ws) if ws == data.workspaces[0].0));
+	}
+
+	#[test]
+	fn monitor_switch_continues_after_the_active_monitor() {
+		let data = hypr_data();
+		let active = Active::Monitor(0);
+		let next = find_next(
+			&SwitchType::Monitor,
+			&dispatch(false, 1),
+			&data,
+			Some(&active),
+		)
+		.unwrap();
+		assert!(matches!(next, Active::Monitor(1)));
+	}
+
+	#[test]
+	fn monitor_switch_reverse_wraps_around() {
+		let data = hypr_data();
+		let active = Active::Monitor(0);
+		let next = find_next(
+			&SwitchType::Monitor,
+			&dispatch(true, 1),
+			&data,
+			Some(&active),
+		)
+		.unwrap();
+		assert!(matches!(next, Active::Monitor(1)));
+	}
+
+	#[test]
+	fn active_of_a_different_kind_is_ignored() {
+		let data = hypr_data();
+		// the switch type is `Client`, so an active workspace must not influence the result
+		let active = Active::Workspace(data.workspaces[1].0.clone());
+		let next = find_next(
+			&SwitchType::Client,
+			&dispatch(false, 1),
+			&data,
+			Some(&active),
+		)
+		.unwrap();
+		assert!(matches!(next, Active::Client(addr) if addr == data.clients[0].0));
+	}
+
+	#[test]
+	fn result_kind_follows_the_switch_type() {
+		let data = hypr_data();
+		let cfg = dispatch(false, 1);
+		assert!(matches!(
+			find_next(&SwitchType::Client, &cfg, &data, None).unwrap(),
+			Active::Client(_)
+		));
+		assert!(matches!(
+			find_next(&SwitchType::Workspace, &cfg, &data, None).unwrap(),
+			Active::Workspace(_)
+		));
+		assert!(matches!(
+			find_next(&SwitchType::Monitor, &cfg, &data, None).unwrap(),
+			Active::Monitor(_)
+		));
+	}
+
+	#[test]
+	fn disabled_clients_are_not_selected() {
+		let mut data = hypr_data();
+		data.clients[0].1.enabled = false;
+		let next = find_next(&SwitchType::Client, &dispatch(false, 1), &data, None).unwrap();
+		assert!(matches!(next, Active::Client(addr) if addr == data.clients[1].0));
+	}
+
+	#[test]
+	fn empty_data_is_an_error_with_context() {
+		let data = HyprlandData::default();
+		let cfg = dispatch(false, 1);
+
+		let err = find_next(&SwitchType::Client, &cfg, &data, None).unwrap_err();
+		assert!(err.to_string().contains("next client"), "{err}");
+		let err = find_next(&SwitchType::Workspace, &cfg, &data, None).unwrap_err();
+		assert!(err.to_string().contains("next workspace"), "{err}");
+		let err = find_next(&SwitchType::Monitor, &cfg, &data, None).unwrap_err();
+		assert!(err.to_string().contains("next monitor"), "{err}");
+	}
+
+	#[test]
+	fn clear_recent_clients_empties_the_shared_map() {
+		let map = get_recent_clients_map();
+		let addr = ClientAddress::from(hyprland::shared::Address::new(0x77aa_u32));
+		map.lock().unwrap().insert(addr.clone(), 3);
+		assert_eq!(map.lock().unwrap().get(&addr), Some(&3));
+
+		clear_recent_clients();
+
+		assert!(map.lock().unwrap().get(&addr).is_none());
+	}
+}

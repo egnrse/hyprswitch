@@ -8,4 +8,4 @@ mod sort;
 mod update;
 
 #[cfg(test)]
-mod tests;
+pub(super) mod tests;

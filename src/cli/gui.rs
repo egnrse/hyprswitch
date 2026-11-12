@@ -126,3 +126,74 @@ impl FromStr for Monitors {
 		Ok(Self(vec))
 	}
 }
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+
+	#[test]
+	fn close_type_converts_to_the_library_type() {
+		assert!(matches!(
+			CloseType::from(InputCloseType::Default),
+			CloseType::Default
+		));
+		assert!(matches!(
+			CloseType::from(InputCloseType::ModKeyRelease),
+			CloseType::ModKeyRelease
+		));
+	}
+
+	#[test]
+	fn submap_conf_becomes_a_config_submap() {
+		let conf = SubmapConf {
+			mod_key: shared::InputModKey::Alt,
+			key: "tab".to_string(),
+			close: InputCloseType::ModKeyRelease,
+		};
+
+		let submap = conf.into_submap_conf(InputReverseKey::Key("grave".to_string()));
+
+		match submap {
+			SubmapConfig::Config {
+				mod_key,
+				key,
+				close,
+				reverse_key,
+			} => {
+				assert_eq!(mod_key.to_string(), "ALT_L");
+				assert_eq!(key, "tab");
+				assert!(matches!(close, CloseType::ModKeyRelease));
+				assert!(matches!(reverse_key, hyprswitch::ReverseKey::Key(k) if k == "grave"));
+			}
+			other => panic!("expected the `Config` variant, got {other:?}"),
+		}
+	}
+
+	#[test]
+	fn submap_info_becomes_a_named_submap() {
+		let info = SubmapInfo {
+			submap: "hyprswitch".to_string(),
+		};
+
+		let submap = info.into_submap_info(InputReverseKey::Mod(shared::InputModKey::ShiftR));
+
+		match submap {
+			SubmapConfig::Name { name, reverse_key } => {
+				assert_eq!(name, "hyprswitch");
+				assert!(matches!(
+					reverse_key,
+					hyprswitch::ReverseKey::Mod(hyprswitch::ModKey::ShiftR)
+				));
+			}
+			other => panic!("expected the `Name` variant, got {other:?}"),
+		}
+	}
+
+	#[test]
+	fn unknown_monitors_are_rejected_with_the_name_of_the_monitor() {
+		// no monitor can have this name (and without a running Hyprland there are none at all)
+		let err = Monitors::from_str("no-such-monitor-0").unwrap_err();
+
+		assert!(err.contains("no-such-monitor-0"), "{err}");
+	}
+}

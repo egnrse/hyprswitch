@@ -8,6 +8,7 @@ use hyprland::shared::MonitorId;
 use random_color::RandomColor;
 use svg::node::element::{Group, Rectangle, Text, SVG};
 
+mod edge_cases;
 mod many_windows;
 mod multi_workspace_multi_monitor_horizontal;
 mod multi_workspaces;

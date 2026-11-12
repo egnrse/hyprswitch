@@ -259,3 +259,175 @@ pub fn check_version() -> anyhow::Result<()> {
 
 	Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+	use std::ffi::OsString;
+
+	use super::*;
+
+	#[test]
+	fn update_cause_display() {
+		assert_eq!(UpdateCause::Client(3).to_string(), "id:3");
+		assert_eq!(UpdateCause::GuiClick.to_string(), "gc");
+		assert_eq!(UpdateCause::BackgroundThread(Some(7)).to_string(), "bt:7");
+		assert_eq!(UpdateCause::BackgroundThread(None).to_string(), "bt");
+	}
+
+	#[test]
+	fn warn_passes_values_through_and_turns_errors_into_none() {
+		assert_eq!(Some(1).warn("unused"), Some(1));
+		assert_eq!(None::<i32>.warn("something is missing"), None);
+		assert_eq!(Ok::<_, String>(2).warn("unused"), Some(2));
+		assert_eq!(Err::<i32, _>("boom").warn("something failed"), None);
+	}
+
+	/// sends `transfer` through the same (de)serialization the client and the daemon use
+	fn roundtrip(transfer: TransferType) -> Transfer {
+		let sent = Transfer {
+			transfer,
+			version: "6.0.0".to_string(),
+		};
+		let bytes = bincode::serialize(&sent).expect("transfer must be serializable");
+		bincode::deserialize(&bytes).expect("transfer must be deserializable")
+	}
+
+	#[test]
+	fn dispatch_transfer_survives_bincode() {
+		let received = roundtrip(TransferType::Dispatch(DispatchConfig {
+			reverse: true,
+			offset: 3,
+		}));
+
+		assert_eq!(received.version, "6.0.0");
+		assert!(matches!(
+			received.transfer,
+			TransferType::Dispatch(DispatchConfig {
+				reverse: true,
+				offset: 3
+			})
+		));
+	}
+
+	#[test]
+	fn init_transfer_survives_bincode() {
+		let simple = SimpleConfig {
+			switch_type: SwitchType::Workspace,
+			sort_recent: true,
+			filter_same_class: true,
+			..Default::default()
+		};
+		let gui = GuiConfig {
+			max_switch_offset: 4,
+			monitors: Some(vec!["DP-1".to_string(), "HDMI-A-1".to_string()]),
+			..Default::default()
+		};
+		let submaps = [
+			SubmapConfig::Config {
+				mod_key: ModKey::AltL,
+				key: "tab".to_string(),
+				close: CloseType::ModKeyRelease,
+				reverse_key: ReverseKey::Key("grave".to_string()),
+			},
+			SubmapConfig::Name {
+				name: "hyprswitch".to_string(),
+				reverse_key: ReverseKey::Mod(ModKey::ShiftR),
+			},
+		];
+
+		for submap in submaps {
+			let sent = TransferType::Init(simple.clone(), gui.clone(), submap);
+			let expected = format!("{sent:?}");
+
+			let received = roundtrip(sent);
+
+			assert_eq!(format!("{:?}", received.transfer), expected);
+		}
+	}
+
+	#[test]
+	fn simple_transfers_survive_bincode() {
+		assert!(matches!(
+			roundtrip(TransferType::Close(true)).transfer,
+			TransferType::Close(true)
+		));
+		assert!(matches!(
+			roundtrip(TransferType::Close(false)).transfer,
+			TransferType::Close(false)
+		));
+		assert!(matches!(
+			roundtrip(TransferType::VersionCheck).transfer,
+			TransferType::VersionCheck
+		));
+		assert!(matches!(
+			roundtrip(TransferType::Open).transfer,
+			TransferType::Open
+		));
+	}
+
+	#[test]
+	fn truncated_transfer_is_an_error_instead_of_a_panic() {
+		let sent = Transfer {
+			transfer: TransferType::Dispatch(DispatchConfig {
+				reverse: false,
+				offset: 1,
+			}),
+			version: "6.0.0".to_string(),
+		};
+		let bytes = bincode::serialize(&sent).unwrap();
+
+		assert!(bincode::deserialize::<Transfer>(&[]).is_err());
+		assert!(bincode::deserialize::<Transfer>(&bytes[..bytes.len() - 1]).is_err());
+	}
+
+	/// restores the given environment variables when dropped (even if the test fails)
+	struct EnvGuard(Vec<(&'static str, Option<OsString>)>);
+
+	impl EnvGuard {
+		fn new(keys: &[&'static str]) -> Self {
+			Self(
+				keys.iter()
+					.map(|key| (*key, std::env::var_os(key)))
+					.collect(),
+			)
+		}
+	}
+
+	impl Drop for EnvGuard {
+		fn drop(&mut self) {
+			for (key, value) in self.0.drain(..) {
+				match value {
+					Some(value) => std::env::set_var(key, value),
+					None => std::env::remove_var(key),
+				}
+			}
+		}
+	}
+
+	// the only test that touches these variables, so it is safe next to the other (parallel) tests
+	#[test]
+	fn socket_path_is_taken_from_the_environment() {
+		let _guard = EnvGuard::new(&["XDG_RUNTIME_DIR", "UID"]);
+		let file = if cfg!(debug_assertions) {
+			"hyprswitch.debug.sock"
+		} else {
+			"hyprswitch.sock"
+		};
+
+		std::env::set_var("XDG_RUNTIME_DIR", "/xdg/runtime");
+		std::env::set_var("UID", "1234");
+		assert_eq!(
+			get_socket_path_buff(),
+			PathBuf::from("/xdg/runtime").join(file)
+		);
+
+		std::env::remove_var("XDG_RUNTIME_DIR");
+		assert_eq!(
+			get_socket_path_buff(),
+			PathBuf::from("/run/user/1234").join(file)
+		);
+
+		std::env::remove_var("UID");
+		assert_eq!(get_socket_path_buff(), PathBuf::from("/tmp").join(file));
+	}
+}

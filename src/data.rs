@@ -123,3 +123,58 @@ pub fn get_ws(w: &WorkspaceBasic) -> Option<Workspace> {
 		.find(|ws| ws.address == w.address)
 		.cloned()
 }
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+
+	fn monitor(x: i32, connector: &str) -> MonitorData {
+		MonitorData {
+			x,
+			y: 0,
+			width: 1920,
+			height: 1080,
+			connector: connector.to_string(),
+			enabled: true,
+		}
+	}
+
+	#[test]
+	fn addresses_display_like_the_wrapped_address() {
+		let address = Address::new("0x1f");
+
+		assert_eq!(WorkspaceAddress::from(address.clone()).to_string(), "0x1f");
+		assert_eq!(ClientAddress::from(address).to_string(), "0x1f");
+	}
+
+	#[test]
+	fn find_by_first_returns_the_data_of_the_matching_monitor() {
+		let monitors = vec![(0, monitor(0, "DP-1")), (1, monitor(1920, "HDMI-A-1"))];
+
+		let found = monitors.find_by_first(&1).expect("monitor 1 exists");
+
+		assert_eq!(found.connector, "HDMI-A-1");
+		assert_eq!(found.x, 1920);
+	}
+
+	#[test]
+	fn find_by_first_returns_none_for_an_unknown_monitor() {
+		let monitors = vec![(0, monitor(0, "DP-1"))];
+
+		assert!(monitors.find_by_first(&9).is_none());
+	}
+
+	#[test]
+	fn find_by_first_on_an_empty_list_returns_none() {
+		let monitors: Vec<(MonitorId, MonitorData)> = vec![];
+
+		assert!(monitors.find_by_first(&0).is_none());
+	}
+
+	#[test]
+	fn find_by_first_returns_the_first_of_duplicate_ids() {
+		let monitors = vec![(0, monitor(0, "first")), (0, monitor(1, "second"))];
+
+		assert_eq!(monitors.find_by_first(&0).unwrap().connector, "first");
+	}
+}

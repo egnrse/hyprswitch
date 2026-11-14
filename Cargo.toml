@@ -15,7 +15,7 @@ categories = ["command-line-utilities"]
 hyprland = { git = "https://github.com/romanstingler/hyprland-rs-next", tag = "0.7.0"}
 #hyprland = { version = "0.4.0-beta.3", features = ["async-lite", "dispatch", "keyword", "data", "listener"], default-features = false }
 anyhow = "1.0"
-async-channel = { version = "2.5", default-features = false }
+async-channel = { version = "2.5", features = ["std"], default-features = false }
 bincode = "1.0"
 clap = { version = "4.6", features = ["derive"] }
 lazy_static = { version = "1.5" }
@@ -31,8 +31,6 @@ tracing-subscriber = { version = "0.3", features = ["std", "fmt", "env-filter", 
 
 gtk4 = { version = "0.11", default-features = false, features = ["v4_6"] }
 gtk4-layer-shell = { version = "0.8" }
-
-ron = { version = "0.8", optional = true }
 
 [dev-dependencies]
 random_color = { version = "1.0", default-features = false }

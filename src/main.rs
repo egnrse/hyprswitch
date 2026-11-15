@@ -3,10 +3,9 @@ use clap::Parser;
 use hyprswitch::daemon::gui::{debug_desktop_files, debug_list, debug_search_class};
 use hyprswitch::envs::{envvar_dump, LOG_MODULE_PATH};
 use hyprswitch::{
-	check_version, client, global, handle, toast, DispatchConfig, GuiConfig, InitConfig,
+	check_version, client, global, handle, toast, DispatchConfig, Exit, GuiConfig, InitConfig,
 	SimpleConfig, SubmapConfig, SwitchType, Warn,
 };
-use std::process::exit;
 use std::sync::Mutex;
 use tracing::level_filters::LevelFilter;
 use tracing::{info, warn};
@@ -21,10 +20,10 @@ fn main() -> anyhow::Result<()> {
             if !cli::check_invalid_inputs(&e) {
                 toast("Unable to parse CLI Arguments (visit https://github.com/egnrse/hyprswitch/blob/main/README.md to see all CLI Args)");
 				eprintln!("{}", e);
-				exit(1);
+				Exit::InvalidArgs.exit();
             }
             eprintln!("{}", e);
-            exit(0);
+            Exit::Ok.exit();
         });
 
 	let filter = EnvFilter::from_default_env().add_directive(

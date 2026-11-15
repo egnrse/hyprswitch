@@ -2,6 +2,7 @@
 
 use crate::client::daemon_running;
 use crate::daemon::handle_fns::{close, init, switch};
+use crate::data::Exit;
 use crate::envs::SYSTEMD_SERVICE;
 use crate::{get_socket_path_buff, global, toast, Share, Transfer, TransferType};
 use anyhow::Context;
@@ -10,7 +11,6 @@ use std::env;
 use std::fs::remove_file;
 use std::io::{BufRead, BufReader, Write};
 use std::os::unix::net::{UnixListener, UnixStream};
-use std::process::exit;
 use std::time::Instant;
 use tracing::{debug, error, info, trace, warn};
 use tracing::{span, Level};
@@ -18,7 +18,7 @@ use tracing::{span, Level};
 pub(super) fn start_handler_blocking(share: &Share) {
 	if daemon_running() {
 		warn!("Daemon already running");
-		exit(0);
+		Exit::Error.exit();
 	}
 	let buf = get_socket_path_buff();
 	let path = buf.as_path();
@@ -96,12 +96,10 @@ pub(super) fn handle_client_transfer(
 		if *SYSTEMD_SERVICE {
 			// automatically restart if in systemd mode
 			debug!("Restarting daemon");
-			exit(1);
+			Exit::VersionMismatch.exit();
 		} else {
 			toast(VERSION_OUT_OF_SYNC);
 			return_success(false, &mut stream)?;
-
-			// automatically restart if in systemd mode
 
 			// don't return Error (would trigger new toast)
 			return Ok(());

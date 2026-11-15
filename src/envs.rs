@@ -12,8 +12,10 @@ lazy_static! {
 	pub static ref LOG_MODULE_PATH: bool = env::var("LOG_MODULE_PATH")
 		.map(|s| s.parse().expect("Failed to parse LOG_MODULE_PATH"))
 		.unwrap_or(false);
-	/// (*allows exiting on new monitors or new versions as it automatically restarts*)
+	/// if running as a systemd service
 	/// (default: false)
+	///
+	/// allows exiting on new monitors or new versions (as it can automatically restart)
 	pub static ref SYSTEMD_SERVICE: bool = env::var("SYSTEMD_SERVICE")
 		.map(|s| s.parse().expect("Failed to parse SYSTEMD_SERVICE"))
 		.unwrap_or(false);

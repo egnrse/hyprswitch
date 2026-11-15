@@ -8,6 +8,27 @@ use hyprland::shared::{Address, HyprData, MonitorId};
 /// panic message for `.expect()` on the [`Address`] field of [`hyprland::data`] structures
 pub const ADDR_EXPECT: &str = "address should be available on hyprland >=0.57";
 
+/// exit codes
+///
+/// the systemd service restarts silently, when hyprswitch exits with code 100-110
+pub enum Exit {
+	/// successful execution
+	Ok = 0,
+	/// general error
+	Error = 1,
+	/// invalid input arguments
+	InvalidArgs = 2,
+
+	/// version mismatch between a client and the daemon
+	VersionMismatch = 100,
+}
+impl Exit {
+	/// exit the program
+	pub fn exit(self) -> ! {
+		std::process::exit(self as i32)
+	}
+}
+
 /* STRUCTS */
 
 /// wrapper for [`Address`] when used for Workspaces

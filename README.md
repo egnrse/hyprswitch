@@ -63,7 +63,7 @@ yay -S hyprswitch
 
 ## Usage
 
-To use the GUI, you need to start the daemon first with eg. `hyprswitch init`. It is recommended to start the daemon through hyprland.
+To use the GUI, you need to start the daemon first with eg. `hyprswitch init`. It is recommended to start the daemon through hyprland or use the [systemd service](./assets/hyprswitch.service).
 
 Subsequent calls to hyprswitch (with the `gui`/`dispatch`/`close` subcommands) will send the command to the daemon which will execute the command and update the GUI.
 
@@ -71,6 +71,8 @@ The following example opens hyprswitch with `SUPER+TAB`. Put it in your [hyprlan
 ```lua
 -- Initialize the hyprswitch daemon on startup
 -- (https://wiki.hypr.land/Configuring/Basics/Autostart/)
+-- or alternatively enable the systemd service once with
+-- 'systemctl --user enable --now hyprswitch'
 hl.on("hyprland.start", function ()
 	hl.exec_cmd("hyprswitch init --show-title")
 end)

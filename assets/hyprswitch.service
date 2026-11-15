@@ -14,7 +14,8 @@ EnvironmentFile=-/etc/default/hyprswitch
 EnvironmentFile=-%h/.config/hyprswitch/args.env
 Environment=SYSTEMD_SERVICE=true
 ExecStart=/usr/bin/hyprswitch $HYPRSWITCH_OPTIONS init $HYPRSWITCH_ARGS
-Restart=always
+Restart=no
+RestartForceExitStatus=100-110
 RestartSec=1
 
 [Install]
